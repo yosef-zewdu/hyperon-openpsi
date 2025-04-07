@@ -19,3 +19,10 @@
 2025-04-07 15:11:13,832 - MeTTaLogger - INFO - [FEELING_UPDATE]-Mood Calm' -> Tense  
 2025-04-07 15:11:13,833 - MeTTaLogger - ERROR - log-event: No handler found for event type 'unknown_event'
 2025-04-07 15:11:13,833 - MeTTaLogger - INFO - [MODULATOR_UPDATE]-ReverbDecay 2.5' -> 3.0   diff=0.5
+2025-04-07 15:12:54,467 - MeTTaLogger - INFO - --- Logger initialized. Logging to console (level DEBUG) and file 'metta_events.log' (level INFO) ---
+2025-04-07 15:12:54,469 - MeTTaLogger - INFO - `log-event` operation registered for MeTTa.
+2025-04-07 15:12:54,470 - MeTTaLogger - INFO - [MODULATOR_UPDATE]-Volume 0.5' -> 0.75   diff=0.25
+2025-04-07 15:12:54,471 - MeTTaLogger - INFO - [FEELING_UPDATE]-Joy 0.6' -> 0.8  
+2025-04-07 15:12:54,475 - MeTTaLogger - INFO - [FEELING_UPDATE]-Mood Calm' -> Tense  
+2025-04-07 15:12:54,475 - MeTTaLogger - ERROR - log-event: No handler found for event type 'unknown_event'
+2025-04-07 15:12:54,476 - MeTTaLogger - INFO - [MODULATOR_UPDATE]-ReverbDecay 2.5' -> 3.0   diff=0.5
