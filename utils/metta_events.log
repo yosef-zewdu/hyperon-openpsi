@@ -1,0 +1,21 @@
+2025-04-07 12:43:15,999 - MeTTaLogger - INFO - --- Logger initialized. Logging to console (level DEBUG) and file 'metta_events.log' (level INFO) ---
+2025-04-07 12:43:16,000 - MeTTaLogger - INFO - `log-event` operation registered for MeTTa.
+2025-04-07 12:43:16,001 - MeTTaLogger - INFO - [MODULATOR_UPDATE]-Volume 0.5' -> 0.75   diff=0.25
+2025-04-07 12:43:16,002 - MeTTaLogger - INFO - [FEELING_UPDATE]-Joy 0.6' -> 0.8  
+2025-04-07 12:43:16,006 - MeTTaLogger - INFO - [FEELING_UPDATE]-Mood Calm' -> Tense  
+2025-04-07 12:43:16,006 - MeTTaLogger - ERROR - log-event: No handler found for event type 'unknown_event'
+2025-04-07 12:43:16,007 - MeTTaLogger - INFO - [MODULATOR_UPDATE]-ReverbDecay 2.5' -> 3.0   diff=0.5
+2025-04-07 12:43:19,863 - MeTTaLogger - INFO - --- Logger initialized. Logging to console (level DEBUG) and file 'metta_events.log' (level INFO) ---
+2025-04-07 12:43:19,864 - MeTTaLogger - INFO - `log-event` operation registered for MeTTa.
+2025-04-07 12:43:19,866 - MeTTaLogger - INFO - [MODULATOR_UPDATE]-Volume 0.5' -> 0.75   diff=0.25
+2025-04-07 12:43:19,867 - MeTTaLogger - INFO - [FEELING_UPDATE]-Joy 0.6' -> 0.8  
+2025-04-07 12:43:19,871 - MeTTaLogger - INFO - [FEELING_UPDATE]-Mood Calm' -> Tense  
+2025-04-07 12:43:19,871 - MeTTaLogger - ERROR - log-event: No handler found for event type 'unknown_event'
+2025-04-07 12:43:19,872 - MeTTaLogger - INFO - [MODULATOR_UPDATE]-ReverbDecay 2.5' -> 3.0   diff=0.5
+2025-04-07 15:11:13,825 - MeTTaLogger - INFO - --- Logger initialized. Logging to console (level DEBUG) and file 'metta_events.log' (level INFO) ---
+2025-04-07 15:11:13,826 - MeTTaLogger - INFO - `log-event` operation registered for MeTTa.
+2025-04-07 15:11:13,827 - MeTTaLogger - INFO - [MODULATOR_UPDATE]-Volume 0.5' -> 0.75   diff=0.25
+2025-04-07 15:11:13,828 - MeTTaLogger - INFO - [FEELING_UPDATE]-Joy 0.6' -> 0.8  
+2025-04-07 15:11:13,832 - MeTTaLogger - INFO - [FEELING_UPDATE]-Mood Calm' -> Tense  
+2025-04-07 15:11:13,833 - MeTTaLogger - ERROR - log-event: No handler found for event type 'unknown_event'
+2025-04-07 15:11:13,833 - MeTTaLogger - INFO - [MODULATOR_UPDATE]-ReverbDecay 2.5' -> 3.0   diff=0.5

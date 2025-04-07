@@ -1,62 +1,24 @@
-
-# from hyperon import *
-# from hyperon.ext import register_atoms
-# import random
-# import string
-# import time
-# from hyperon.atoms import OperationAtom, V
-# from hyperon.ext import register_atoms
-# import itertools
-# from itertools import combinations
-
-
-# def print_atom(metta: MeTTa, var1, var2):
-#     var7 = "(" + str(var1) + " " + str(var2) + ")"
-#     var8 = metta.parse_all(var7)
-#     return var8
-
-
-# @register_atoms(pass_metta=True)
-# def main(metta):
-#     printer_var = OperationAtom(
-#         "printer",
-#         lambda var1, var2: print_atom(metta, var1, var2),
-#         ["Atom", "Atom", "Expression"],
-#         unwrap=False,
-#     )
-
-#     return {r"printer": printer_var}
-
-
-# log/event_logger.py
-
 import logging
 import sys
 from hyperon import *
 from hyperon.ext import register_atoms
-from hyperon.atoms import OperationAtom, GroundedAtom, SymbolAtom, ValueAtom
+from hyperon.atoms import OperationAtom, GroundedAtom, SymbolAtom, ValueAtom, ExpressionAtom
 
-# --- Configuration ---
 LOG_FILE_NAME = 'metta_events.log'
 LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-CONSOLE_LOG_LEVEL = logging.DEBUG  # Log DEBUG and higher to console
-FILE_LOG_LEVEL = logging.INFO     # Log INFO and higher to file
+CONSOLE_LOG_LEVEL = logging.DEBUG
+FILE_LOG_LEVEL = logging.INFO
 LOGGER_NAME = 'MeTTaLogger'
-# ---------------------
 
-# --- Setup Python Logger ---
 logger = logging.getLogger(LOGGER_NAME)
-logger.setLevel(logging.DEBUG) # Set lowest level to capture all messages
+logger.setLevel(logging.DEBUG)
 
-# --- Console Handler ---
-console_handler = logging.StreamHandler(sys.stdout) # Log to standard output
+console_handler = logging.StreamHandler(sys.stdout)
 console_handler.setLevel(CONSOLE_LOG_LEVEL)
 console_formatter = logging.Formatter(LOG_FORMAT)
 console_handler.setFormatter(console_formatter)
-if not any(isinstance(h, logging.StreamHandler) for h in logger.handlers): # Avoid adding handlers multiple times
+if not any(isinstance(h, logging.StreamHandler) for h in logger.handlers):
     logger.addHandler(console_handler)
-
-    # --- File Handler ---
     try:
         file_handler = logging.FileHandler(LOG_FILE_NAME)
         file_handler.setLevel(FILE_LOG_LEVEL)
@@ -68,43 +30,30 @@ if not any(isinstance(h, logging.StreamHandler) for h in logger.handlers): # Avo
         logger.error(f"Failed to initialize file handler for {LOG_FILE_NAME}: {e}")
         print(f"ERROR: Failed to initialize file handler for {LOG_FILE_NAME}: {e}", file=sys.stderr)
 
-# --- Event Handlers (Extensible Part) ---
-# Handlers now just format the message string based on arguments
-
 def format_modulator_change(name: str, old_value: str, new_value: str) -> str:
-    """Formats the log message for modulator changes."""
-    return f"Modulator Change: Name='{name}', Old='{old_value}', New='{new_value}'"
+    return f"[MODULATOR_UPDATE]-{name} {old_value}' -> {new_value}   diff={float(new_value) - float(old_value)}"
 
-# Add more handlers here as needed, they should return a string message
-# def format_user_action(user_id: str, action: str) -> str:
-#     return f"User Action: User='{user_id}', Action='{action}'"
+def format_feeling_update(feeling_name: str, old_value: str, new_value: str) -> str:
+    return f"[FEELING_UPDATE]-{feeling_name} {old_value}' -> {new_value}  "  
 
-# --- Mapping Event Types to Handlers and Default Levels ---
-# Structure: "event_type": (handler_function, default_logging_level)
+def format_schema_update(schema_id: str, update_type: str, details: str) -> str:
+    return f"[SCHEMA_UPDATE]-{schema_id} {update_type} {details}"
+
 EVENT_HANDLERS = {
     "modulator_change": (format_modulator_change, logging.INFO),
-    "modulator_debug": (format_modulator_change, logging.DEBUG), # Example: same formatter, different level
-    # "user_action": (format_user_action, logging.WARNING), # Example for future extension
+    "modulator_debug": (format_modulator_change, logging.DEBUG),
+    "feeling_update": (format_feeling_update, logging.INFO),
+    "feeling_update_debug": (format_feeling_update, logging.DEBUG),
+    "schema_update": (format_schema_update, logging.DEBUG),
 }
 
-# --- MeTTa Integration ---
-
 def log_event_atom_execute(metta: MeTTa, event_type_atom: Atom, *args: Atom):
-    """
-    MeTTa operation function to dispatch logging events.
-    Level is determined internally based on event_type.
-    Expects:
-    1. event_type (SymbolAtom): String identifying the handler (e.g., 'modulator_change').
-    2. *args (Atom...): Specific arguments for the handler.
-    """
     try:
-        # Extract event type (must be a Symbol)
         if not isinstance(event_type_atom, SymbolAtom):
             logger.error(f"log-event: Expected Symbol for event_type, got {type(event_type_atom)}: {event_type_atom}")
-            return [] # Return empty result on error
+            return []
         event_type = event_type_atom.get_name()
 
-        # Find the correct handler and its default level
         handler_info = EVENT_HANDLERS.get(event_type)
         if handler_info is None:
             logger.error(f"log-event: No handler found for event type '{event_type}'")
@@ -112,41 +61,41 @@ def log_event_atom_execute(metta: MeTTa, event_type_atom: Atom, *args: Atom):
 
         formatter_func, default_level = handler_info
 
-        # Convert remaining MeTTa atoms to Python strings for simplicity
-        handler_args = [str(arg) for arg in args]
+        if len(args) != 1 or not isinstance(args[0], ExpressionAtom):
+            arg_types = [type(a) for a in args]
+            logger.error(f"log-event: Incorrect structure received. Expected a single ExpressionAtom as the second argument (payload), but got {len(args)} items with types {arg_types}. Content: {args}")
+            return []
 
-        # Call the specific formatter function to get the message
+        payload_expression: ExpressionAtom = args[0]
+        actual_arg_atoms = payload_expression.get_children()
+        handler_args: list[str] = [str(arg) for arg in actual_arg_atoms]
+
         try:
             message = formatter_func(*handler_args)
         except TypeError as te:
-             # Error likely due to wrong number of arguments passed from MeTTa
              expected_args_count = formatter_func.__code__.co_argcount
-             logger.error(f"log-event: Formatter for '{event_type}' called with incorrect number of arguments. Expected {expected_args_count}, Got {len(handler_args)}. MeTTa args: {args}. Error: {te}")
+             logger.error(f"log-event: Handler for '{event_type}' ({formatter_func.__name__}) called with wrong number of arguments. "
+                          f"Expected {expected_args_count}, Got {len(handler_args)}. "
+                          f"Payload expression content: {payload_expression}. Error: {te}")
              return []
         except Exception as e:
-            logger.error(f"log-event: Error executing formatter for '{event_type}': {e}")
+            logger.error(f"log-event: Error executing handler '{event_type}': {e}")
             return []
 
-        # Log the message using the determined level
         logger.log(default_level, message)
-
-        # Return empty expression '()' to indicate successful execution of side-effect
-        return [] # Changed from previous version, [] represents ()
+        return []
 
     except Exception as e:
-        logger.error(f"log-event: Unexpected error processing log event: {e}")
-        return [] # Return empty on unexpected errors
+        logger.exception(f"log-event: Unexpected error processing log event: {e}")
+        return []
 
 @register_atoms(pass_metta=True)
 def register_logger_atoms(metta):
-    """Registers the log-event operation atom."""
     log_event_atom = OperationAtom(
         "log-event",
-        # Lambda now only takes event_type and *args
-        lambda event_type, *args: log_event_atom_execute(metta, event_type, *args),
-        # Type signature updated: Symbol, then variable arguments
+        lambda event_type, payload_expr: log_event_atom_execute(metta, event_type, payload_expr),
         ["Atom", "Expression", "Expression"],
-        unwrap=False, # We need to handle Atom types directly
+        unwrap=False,
     )
     logger.info("`log-event` operation registered for MeTTa.")
     return {"log-event": log_event_atom}
