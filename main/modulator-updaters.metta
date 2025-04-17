@@ -1,3 +1,4 @@
+(: ActivationHelper (-> Number Number Number Number))
 (= (ActivationHelper $competence $energy $stimulus)
     (+  (* 2 $stimulus)
              (* (/ $competence (+ $competence 0.5) )
@@ -6,7 +7,7 @@
          )
 )
 
-
+(: SecuringThresholdHelper (-> Number Number Number))
 (= (SecuringThresholdHelper  $integrity $stimulus)
      (+  (* 2 $stimulus)
              (pow-math 
@@ -15,6 +16,7 @@
         )
 
 )
+(: SelectionThresholdHelper (-> Number Number Number))
 (= (SelectionThresholdHelper $competence $stimulus)
      (+  (* 2 $stimulus)
              (fuzzy_equal $competence 1 15)
