@@ -1,3 +1,10 @@
+(= (fuzzy_equal $x $t $a)
+    (/ 1
+        (+ 1
+            (* $a (*(- $x $t) (- $x $t)))
+        )  
+    )     
+)
 (: ActivationHelper (-> Number Number Number Number))
 (= (ActivationHelper $competence $energy $stimulus)
     (+  (* 2 $stimulus)
@@ -16,9 +23,13 @@
         )
 
 )
+
 (: SelectionThresholdHelper (-> Number Number Number))
 (= (SelectionThresholdHelper $competence $stimulus)
      (+  (* 2 $stimulus)
              (fuzzy_equal $competence 1 15)
          )
 )
+!(ActivationHelper 4 3 2)
+!(SecuringThresholdHelper 4 3)
+!(SelectionThresholdHelper 3 4)
