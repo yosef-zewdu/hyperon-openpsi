@@ -30,6 +30,3 @@
              (fuzzy_equal $competence 1 15)
          )
 )
-!(ActivationHelper 4 3 2)
-!(SecuringThresholdHelper 4 3)
-!(SelectionThresholdHelper 3 4)
