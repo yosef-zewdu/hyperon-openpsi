@@ -1,28 +1,3 @@
-(= (len $expr)
-    (if (== $expr ())
-        0
-        (let $tail (cdr-atom $expr)
-            (+ 1 (len $tail))
-        )
-    )
-)
-
-(: update-atom (-> Grounded Atom Atom (->)))
-(= (update-atom $space $oatom $natom) (let $_ (remove-atom $space $oatom) (add-atom $space $natom)))
-
-(= (concatTuple $xs $ys)
-    (if (== $xs ())
-        $ys
-        (let* ( 
-                ($head (car-atom $xs))
-                ($tail (cdr-atom $xs))
-                ($tailNew (concatTuple $tail $ys))
-              )
-            (cons-atom $head $tailNew)
-        )
-    )
-)
-
 !(bind! &psiRules (new-space))
 
 (= (PsiRules) &psiRules)
@@ -124,12 +99,3 @@
   )
 )
 
-;;; tests
-
-!(addRule x (AND_LINK ((x1 x2) y)) z (TTV 1 (STV 11.0 11.0)))
-!(getContext x)
-!(getAction x)
-!(getGoal x)
-!(getTV x)
-
-!(addRule x (AND_LINK ((x1 x2) y)) z (TTV 1 (STV 11.0 11.0)))
