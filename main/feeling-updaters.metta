@@ -155,21 +155,21 @@
 
 ; Feeling updaters    
 (= (happinessFeelingUpdater) 
-    (feeling_calculator $modulator_high_indicator
-                        $modulator_low_indicator
-                        $modulator_undefined_indicator 
-                        $modulator_high_indicator
-                        $modulator_high_indicator
+    (feeling_calculator (modulator_high_indicator)
+                        (modulator_low_indicator)
+                        (modulator_undefined_indicator) 
+                        (modulator_high_indicator)
+                        (modulator_high_indicator)
                         4
     )
 )    
 
 (= (sadnessFeelingUpdater) 
-    (feeling_calculator modulator_low_indicator
-                        modulator_high_indicator
-                        modulator_undefined_indicator
-                        modulator_extremely_low_indicator
-                        modulator_extremely_low_indicator
+    (feeling_calculator (modulator_low_indicator)
+                        (modulator_high_indicator)
+                        (modulator_undefined_indicator)
+                        (modulator_extremely_low_indicator)
+                        (modulator_extremely_low_indicator)
                         4
     )
 )    
@@ -214,31 +214,31 @@
 )
 
 (= (prideFeelingUpdater) 
-    (feeling_calculator modulator_undefined_indicator
-                        modulator_low_indicator
-                        modulator_high_indicator
-                        modulator_high_indicator
-                        modulator_high_indicator
+    (feeling_calculator (modulator_undefined_indicator)
+                        (modulator_low_indicator)
+                        (modulator_high_indicator)
+                        (modulator_high_indicator)
+                        (modulator_high_indicator)
                         4
     )
 )
 
 (= (loveFeelingUpdater) 
-    (feeling_calculator modulator_undefined_indicator
-                        modulator_extremely_low_indicator
-                        modulator_extremely_high_indicator
-                        modulator_extremely_high_indicator
-                        modulator_extremely_high_indicator
+    (feeling_calculator (modulator_undefined_indicator)
+                        (modulator_extremely_low_indicator)
+                        (modulator_extremely_high_indicator)
+                        (modulator_extremely_high_indicator)
+                        (modulator_extremely_high_indicator)
                         4
     )
 )
 
 (= (hateFeelingUpdater) 
-    (feeling_calculator modulator_extremely_high_indicator
-                        modulator_extremely_low_indicator
-                        modulator_extremely_high_indicator
-                        modulator_undefined_indicator
-                        modulator_extremely_low_indicator
+    (feeling_calculator (modulator_extremely_high_indicator)
+                        (modulator_extremely_low_indicator)
+                        (modulator_extremely_high_indicator)
+                        (modulator_undefined_indicator)
+                        (modulator_extremely_low_indicator)
                         4
     )
 )
