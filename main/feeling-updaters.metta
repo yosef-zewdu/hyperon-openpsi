@@ -66,9 +66,14 @@
 ;   gratitude     ||                                                              H                H
 ;
 ;   ( H = high, L = low, M = medium, E = extremely )
-;
+
 
 ; Thresholds for fuzzy high, low, medium etc.
+;; !(register-module!  ../../hyperon-openpsi)
+;; !(register-module! ../utilities-module)
+;; !(import! &self utilities-module:utils)
+;; !(import! &self hyperon-openpsi:utils:psi_utils)
+
 (= (modulator_high_threshold) 0.7)
 (= (modulator_extremely_high_threshold) 0.85)
 (= (modulator_low_threshold) 0.3)
@@ -82,24 +87,28 @@
 (= (modulator_high_indicator) 1)
 (= (modulator_extremely_high_indicator) 2)
 (= (modulator_undefined_indicator) 3)
+(= (get_pleasure_value) 0.5)
+(= (sum $list)
+    (foldl + 0 $list)
+)
 
 ; Ma)p a modulator t)o corresponding feeling dimension
 ; indicator equals to -2 means extremely low, -1 low, 0 medium, 1 high, 2 extremely high,
 ; others not defined (would return 0) 
 (= (modulator_to_feeling_dimension $modulator_value $indicator)
     (if (== $indicator (modulator_extremely_low_indicator))
-        (fuzzy_low $modulator_value (modulator_extremely_low_threshold) 50)
+        (fuzzy_less_than $modulator_value (modulator_extremely_low_threshold) 50)
         (if (== $indicator (modulator_low_indicator))
-            (fuzzy_low $modulator_value (modulator_low_threshold) 50)
+            (fuzzy_less_than $modulator_value (modulator_low_threshold) 50)
 
             (if (== $indicator (modulator_medium_indicator))
                 (fuzzy_equal $modulator_value (modulator_medium_threshold) 50)
                 (if (== $indicator (modulator_high_indicator))
-                    (fuzzy_high $modulator_value (modulator_high_threshold) 50)
+                    (fuzzy_greater_than $modulator_value (modulator_high_threshold) 50)
                 
 
                     (if (== $indicator (modulator_extremely_high_indicator))
-                        (fuzzy_high modulator_value modulator_extremely_high_threshold 50)
+                        (fuzzy_greater_than $modulator_value (modulator_extremely_high_threshold) 50)
                         0
                     )
             )
@@ -122,35 +131,36 @@
                        $selection_threshold_indicator 
                        $pleasure_indicator 
                        $number_of_used_modulators)
-
-    (/ (+ (modulator_to_feeling_dimension 
-              (get_latest_predicate_truth_value_mean "ActivationModulator") 
-              activation_indicator 
-          )
-
-          (modulator_to_feeling_dimension
-              (get_latest_predicate_truth_value_mean "ResolutionModulator") 
+    (let* (
+        ($activation-value 0.3)
+        ($resolution-value 0.4)
+        ($securing-value 0.7)
+        ($selection-value 0.4)
+        ($feeling-activation (modulator_to_feeling_dimension $activation-value $activation_indicator))
+        ($feeling-resolution (modulator_to_feeling_dimension
+              $resolution-value 
               $resolution_indicator
-          )
-
-          (modulator_to_feeling_dimension 
-              (get_latest_predicate_truth_value_mean "SecuringThresholdModulator") 
+          ))
+        ($feeling-securing (modulator_to_feeling_dimension 
+              $securing-value 
               $securing_threshold_indicator 
           )
-
-          (modulator_to_feeling_definedimension 
-              (get_latest_predicate_truth_value_mean "SelectionThresholdModulator") 
+        )
+        ($feeling-selection (modulator_to_feeling_dimension 
+              $selection-value 
               $selection_threshold_indicator 
-          )
-
-          (modulator_to_feeling_dimension 
+          ))
+        ($feeling-pleasure (modulator_to_feeling_dimension 
               (get_pleasure_value) 
               $pleasure_indicator
-          )
-       ); +
+          ))
+        ($total (sum ($feeling-activation $feeling-securing $feeling-selection $feeling-pleasure)))
+    )
 
+    (/ $total
        $number_of_used_modulators
     ); / 
+)
 )
 
 ; Feeling updaters    
@@ -252,3 +262,15 @@
                         2
     )
 )
+
+;; ==================================================================================
+;;                                  Tests for feeling updaters
+;; ==================================================================================
+
+;; !(modulator_to_feeling_dimension 0.85 1)
+;; !(feeling_calculator 1 1 1 1 1 5)
+;; !(happinessFeelingUpdater)
+;; !(sadnessFeelingUpdater)
+;; !(angerFeelingUpdater)
+;; !(hateFeelingUpdater)
+;; !(gratitudeFeelingUpdater)
