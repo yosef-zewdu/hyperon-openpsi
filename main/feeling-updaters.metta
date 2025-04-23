@@ -86,30 +86,24 @@
 ; Ma)p a modulator t)o corresponding feeling dimension
 ; indicator equals to -2 means extremely low, -1 low, 0 medium, 1 high, 2 extremely high,
 ; others not defined (would return 0) 
-(define (modulator_to_feeling_dimension $modulator_value $indicator)
-    (cond
-        ( (= indicator modulator_extremely_low_indicator)
-          (fuzzy_low modulator_value modulator_extremely_low_threshold 50)
-        )
+(= (modulator_to_feeling_dimension $modulator_value $indicator)
+    (if (== $indicator (modulator_extremely_low_indicator))
+        (fuzzy_low $modulator_value (modulator_extremely_low_threshold) 50)
+        (if (== $indicator (modulator_low_indicator))
+            (fuzzy_low $modulator_value (modulator_low_threshold) 50)
 
-        ( (= indicator modulator_low_indicator)
-          (fuzzy_low modulator_value modulator_low_threshold 50)
-        )
+            (if (== $indicator (modulator_medium_indicator))
+                (fuzzy_equal $modulator_value (modulator_medium_threshold) 50)
+                (if (== $indicator (modulator_high_indicator))
+                    (fuzzy_high $modulator_value (modulator_high_threshold) 50)
+                
 
-        ( (= indicator modulator_medium_indicator)
-          (fuzzy_equal modulator_value modulator_medium_threshold 50)
+                    (if (== $indicator (modulator_extremely_high_indicator))
+                        (fuzzy_high modulator_value modulator_extremely_high_threshold 50)
+                        0
+                    )
+            )
         )
-
-        ( (= indicator modulator_high_indicator)
-          (fuzzy_high modulator_value modulator_high_threshold 50)
-        )
-
-        ( (= indicator modulator_extremely_high_indicator)
-          (fuzzy_high modulator_value modulator_extremely_high_threshold 50)
-        )
-
-        ( else 
-          0
         )
     );cond 
 )
@@ -136,41 +130,41 @@
 
           (modulator_to_feeling_dimension
               (get_latest_predicate_truth_value_mean "ResolutionModulator") 
-              resolution_indicator
+              $resolution_indicator
           )
 
           (modulator_to_feeling_dimension 
               (get_latest_predicate_truth_value_mean "SecuringThresholdModulator") 
-              securing_threshold_indicator 
+              $securing_threshold_indicator 
           )
 
           (modulator_to_feeling_definedimension 
               (get_latest_predicate_truth_value_mean "SelectionThresholdModulator") 
-              selection_threshold_indicator 
+              $selection_threshold_indicator 
           )
 
           (modulator_to_feeling_dimension 
               (get_pleasure_value) 
-              pleasure_indicator
+              $pleasure_indicator
           )
        ); +
 
-       number_of_used_modulators
+       $number_of_used_modulators
     ); / 
 )
 
 ; Feeling updaters    
-(define (happinessFeelingUpdater) 
-    (feeling_calculator modulator_high_indicator
-                        modulator_low_indicator
-                        modulator_undefined_indicator 
-                        modulator_high_indicator
-                        modulator_high_indicator
+(= (happinessFeelingUpdater) 
+    (feeling_calculator $modulator_high_indicator
+                        $modulator_low_indicator
+                        $modulator_undefined_indicator 
+                        $modulator_high_indicator
+                        $modulator_high_indicator
                         4
     )
 )    
 
-(define (sadnessFeelingUpdater) 
+(= (sadnessFeelingUpdater) 
     (feeling_calculator modulator_low_indicator
                         modulator_high_indicator
                         modulator_undefined_indicator
@@ -180,46 +174,46 @@
     )
 )    
 
-(define (angerFeelingUpdater)
-    (feeling_calculator modulator_high_indicator
-                        modulator_low_indicator
-                        modulator_undefined_indicator
-                        modulator_low_indicator
-                        modulator_extremely_low_indicator
+(=(angerFeelingUpdater)
+    (feeling_calculator (modulator_high_indicator)
+                        (modulator_low_indicator)
+                        (modulator_undefined_indicator)
+                        (modulator_low_indicator)
+                        (modulator_extremely_low_indicator)
                         4
     )
 )
 
-(define (fearFeelingUpdater) 
-    (feeling_calculator modulator_extremely_low_indicator
-                        modulator_extremely_high_indicator
-                        modulator_low_indicator
-                        modulator_undefined_indicator
-                        modulator_extremely_low_indicator
+(= (fearFeelingUpdater) 
+    (feeling_calculator (modulator_extremely_low_indicator)
+                        (modulator_extremely_high_indicator)
+                        (modulator_low_indicator)
+                        (modulator_undefined_indicator)
+                        (modulator_extremely_low_indicator)
                         4
     )
 )
 
-(define (excitementFeelingUpdater) 
-    (max (feeling_calculator modulator_high_indicator
-                             modulator_low_indicator
-                             modulator_undefined_indicator
-                             modulator_low_indicator
-                             modulator_extremely_high_indicator
+(= (excitementFeelingUpdater) 
+    (max (feeling_calculator (modulator_high_indicator)
+                             (modulator_low_indicator)
+                             (modulator_undefined_indicator)
+                             (modulator_low_indicator)
+                             (modulator_extremely_high_indicator)
                              4
          )
 
-         (feeling_calculator modulator_high_indicator
-                             modulator_low_indicator
-                             modulator_undefined_indicator
-                             modulator_low_indicator
-                             modulator_extremely_low_indicator
+         (feeling_calculator (modulator_high_indicator)
+                             (modulator_low_indicator)
+                             (modulator_undefined_indicator)
+                             (modulator_low_indicator)
+                             (modulator_extremely_low_indicator)
                              4
          )
     )
 )
 
-(define (prideFeelingUpdater) 
+(= (prideFeelingUpdater) 
     (feeling_calculator modulator_undefined_indicator
                         modulator_low_indicator
                         modulator_high_indicator
@@ -229,7 +223,7 @@
     )
 )
 
-(define (loveFeelingUpdater) 
+(= (loveFeelingUpdater) 
     (feeling_calculator modulator_undefined_indicator
                         modulator_extremely_low_indicator
                         modulator_extremely_high_indicator
@@ -239,7 +233,7 @@
     )
 )
 
-(define (hateFeelingUpdater) 
+(= (hateFeelingUpdater) 
     (feeling_calculator modulator_extremely_high_indicator
                         modulator_extremely_low_indicator
                         modulator_extremely_high_indicator
@@ -249,12 +243,12 @@
     )
 )
 
-(define (gratitudeFeelingUpdater) 
-    (feeling_calculator modulator_undefined_indicator
-                        modulator_undefined_indicator
-                        modulator_undefined_indicator
-                        modulator_high_indicator
-                        modulator_high_indicator
+(= (gratitudeFeelingUpdater) 
+    (feeling_calculator (modulator_undefined_indicator)
+                        (modulator_undefined_indicator)
+                        (modulator_undefined_indicator)
+                        (modulator_high_indicator)
+                        (modulator_high_indicator)
                         2
     )
 )
