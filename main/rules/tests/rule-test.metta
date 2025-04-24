@@ -2,10 +2,15 @@
 !(register-module! ../../../utilities-module)
 
 !(import! &self hyperon-openpsi:main:rules:rule)
+!(import! &self hyperon-openpsi:main:types)
 !(import! &self utilities-module:utils)
 
 ;if rule is added with the addRule function then the &psiRules index knows 
 ;about it
+
+(: z Goal)
+(: y Action)
+
 !(addRule x (x1 x2) y z (TTV 1 (STV 11.0 11.0)))
 !(assertEqual (getContext x) (x1 x2))
 !(assertEqual (getAction x) y)

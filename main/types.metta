@@ -1,0 +1,2 @@
+(: Goal Type)
+(: Action Type)
