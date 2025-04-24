@@ -1,23 +1,37 @@
 !(bind! &psiRules (new-space))
 
+(= (FALSE_TV) (False (STV 0.0 1.0))) ;False, with Maximum confidence
+(= (TRUE_TV) (True (STV 1.0 1.0))) ;True, with Maximum confidence
+
 (= (PsiRules) &psiRules)
 
-(: addLink (-> Symbol Symbol Expression Symbol Atom))
-(= (addLink $handle $linkType $andLink $goal)
+(: addAndLink (-> Atom Symbol Atom))
+(= (addAndLink $context $action)
+   (let* (
+          ($andLink (AND_LINK ($context $action)))
+          ($_ (add-atom &self $andLink))
+          )
+        $andLink
+     )
+)
+
+(: addRuleLink (-> Symbol Expression Symbol Symbol Expression))
+(= (addRuleLink $handle $context $action $goal)
    (let*
      (
-      ($rule (collapse (match &self (: $handle ($linkType $andLink $goal)) (: $handle ($linkType $andLink $goal)))))
+      ($andLink (addAndLink $context $action))
+      ($rule (collapse (match &self (: $handle (IMPLICATION_LINK $andLink $goal)) (: $handle (IMPLICATION_LINK $andLink $goal)))))
       ($condition (== (len $rule) 0))
     )
       (if $condition 
             (
               let* (
-                    ($newRule (: $handle ($linkType $andLink $goal)))
+                    ($newRule (: $handle (IMPLICATION_LINK $andLink $goal)))
                     ($_ (add-atom &self $newRule))
                   )
-                    $newRule
+                    ($andLink $rule)
             )
-            (car-atom $rule) 
+            ($andLink (car-atom $rule)) 
       )
      )
 )
@@ -27,10 +41,10 @@
    ( let $res (collapse (get-type-space $space $atom)) (not (== (%Undefined%) $res)) )
 )
 
-(: addRule (-> Symbol Expression Symbol Expression Atom))
-(= (addRule $ruleHandle $andLink $goal $tv)
+(: addRule (-> Symbol Atom Symbol Symbol Atom Atom))
+(= (addRule $ruleHandle $context $action $goal $tv)
     (let* (
-              ($rule (addLink $ruleHandle IMPLICATION_LINK $andLink $goal))
+              (($andLink $rule) (addRuleLink $ruleHandle $context $action $goal))
               ($exists (existsIn (PsiRules) $rule))
             )
               (if $exists 
@@ -39,6 +53,7 @@
                     let* (
                           ($newRule (: $ruleHandle (IMPLICATION_LINK $andLink $goal)))
                           ($_ (add-atom (PsiRules) (: $ruleHandle $tv)))
+                          ($_ (add-atom &self (isExecuted $ruleHandle (FALSE_TV))))
                           (() (update-atom (PsiRules) $rule $newRule))
                         )
                         (: $ruleHandle (getRuleType $ruleHandle))

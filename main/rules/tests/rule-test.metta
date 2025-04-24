@@ -6,13 +6,13 @@
 
 ;if rule is added with the addRule function then the &psiRules index knows 
 ;about it
-!(addRule x (AND_LINK ((x1 x2) y)) z (TTV 1 (STV 11.0 11.0)))
+!(addRule x (x1 x2) y z (TTV 1 (STV 11.0 11.0)))
 !(assertEqual (getContext x) (x1 x2))
 !(assertEqual (getAction x) y)
 !(assertEqual (getGoal x) z)
 !(assertEqual (getTV x) (TTV 1 (STV 11.0 11.0)))
 
-!(addRule x (AND_LINK ((x1 x2) y)) z (TTV 1 (STV 11.0 11.0)))
+!(addRule x (x1 x2) y z (TTV 1 (STV 11.0 11.0)))
 
 ;if rule is not added with the addRule function then the &psiRules index does not 
 ;know about it
@@ -20,3 +20,7 @@
 !(assertEqual (getContext rule1) %Undefined%)
 !(assertEqual (getGoal rule1) %Undefined%)
 !(assertEqual (getAction rule1) %Undefined%)
+
+!(assertEqual (existsIn &psiRules rule1) False)
+
+!(assertEqual (existsIn &psiRules x) True)
