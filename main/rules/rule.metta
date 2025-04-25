@@ -120,7 +120,7 @@
 
 
 ;(: x (Goal $value $dgv))
-(: addGoalHelper (-> Symbol Number Number Atom))
+(: addGoalHelper (-> Expression Number Number Atom))
 (= (addGoalHelper $name $value $dgv)
    (if (and (isGvValid $value) (isGvValid $dgv)) 
       (if (not (existsIn &self $name))
@@ -142,7 +142,7 @@
 ;This function accepts an optional third argument,
 ;dgv(desiredGoalValue), if () is passed then a default value of 1.0 is used.
 ;Returns the symbol representing the added goal.
-(: addGoal (-> Symbol Number Atom Atom))
+(: addGoal (-> Expression Number Atom Atom))
 (= (addGoal $name $value $dgv)
    (if (== () $dgv) 
       (addGoalHelper $name $value 1.0) 
