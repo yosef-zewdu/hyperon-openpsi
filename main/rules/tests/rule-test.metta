@@ -30,10 +30,10 @@
 
 !(assertEqual (existsIn &psiRules x) True)
 
-!(assertEqual (addGoal (reduce-hunger) 1 0) (reduce-hunger))
-!(assertEqual (addGoal (reduce-hunger) 1 1) (Goal With Id (reduce-hunger) Already Exists))
-!(assertEqual (addGoal (reduce-hunger) 10 1) (Invalid goal/dgv Value))
-!(assertEqual (addGoal (reduce-hunger) 1 10) (Invalid goal/dgv Value))
+!(assertEqual (addGoal reduceHunger 1 0) reduceHunger)
+!(assertEqual (addGoal reduceHunger 1 1) (Goal With Id reduceHunger Already Exists))
+!(assertEqual (addGoal reduceHunger 10 1) (Invalid goal/dgv Value))
+!(assertEqual (addGoal reduceHunger 1 10) (Invalid goal/dgv Value))
 !(assertEqual (addGoal run 1 ()) run)
 
 !(setGv run 0.5)
