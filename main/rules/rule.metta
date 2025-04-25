@@ -118,9 +118,6 @@
   )
 )
 
-;the function accepts an optional third argument,
-;dgv(desiredGoalValue), if () is passed then a default value of 1
-;is used
 
 ;(: x (Goal $value $dgv))
 (: addGoalHelper (-> Symbol Number Number Atom))
@@ -142,6 +139,9 @@
    (and (>= $value 0.0) (<= $value 1.0))
    )
 
+;This function accepts an optional third argument,
+;dgv(desiredGoalValue), if () is passed then a default value of 1.0 is used.
+;returns the symbol representing the added goal
 (: addGoal (-> Symbol Number Atom Atom))
 (= (addGoal $name $value $dgv)
    (if (== () $dgv) 
