@@ -10,7 +10,7 @@
    (let* (
           ($andLink (AND_LINK ($context $action)))
           ($_ (add-atom &self $andLink))
-          )
+        )
         $andLink
      )
 )
@@ -36,7 +36,7 @@
      )
 )
 
-(: existsIn Grounded Atom Atom)
+(: existsIn Grounded Atom Bool)
 (= (existsIn $space $atom)
    ( let $res (collapse (get-type-space $space $atom)) (not (== (%Undefined%) $res)) )
 )
@@ -117,4 +117,56 @@
     )
   )
 )
+
+;the function accepts an optional third argument,
+;dgv(desiredGoalValue), if () is passed then a default value of 1
+;is used
+
+;(: x (Goal $value $dgv))
+(: addGoalHelper (-> Symbol Number Number Atom))
+(= (addGoalHelper $name $value $dgv)
+   (if (and (isGvValid $value) (isGvValid $dgv)) 
+      (if (not (existsIn &self $name))
+          (let () 
+              (add-atom &self (: $name (Goal $value $dgv))) 
+              $name
+          )
+          (Goal With Id $name Already Exists)
+        )
+      (Invalid goal/dgv Value) 
+    )
+)
+
+(: isGvValid (-> Number Bool))
+(= (isGvValid $value)
+   (and (>= $value 0.0) (<= $value 1.0))
+   )
+
+(: addGoal (-> Symbol Number Atom Atom))
+(= (addGoal $name $value $dgv)
+   (if (== () $dgv) 
+      (addGoalHelper $name $value 1.0) 
+      (addGoalHelper $name $value $dgv)
+    )
+   )
+
+(: setGv (-> Symbol Number (->)))
+(= (setGv $goal $value)
+   (if (not (existsIn &self $goal))
+          (Invalid Goal Id)
+          (let (Goal $oldGv $oldDgv) (get-type $goal) 
+              (update-atom &self (: $goal (Goal $oldGv $oldDgv)) (: $goal (Goal $value $oldDgv)))
+              )
+    )
+   )
+
+(: setDgv (-> Symbol Number (->)))
+(= (setDgv $goal $value)
+   (if (not (existsIn &self $goal))
+          (Invalid Goal Id)
+          (let (Goal $oldGv $oldDgv) (get-type $goal) 
+              (update-atom &self (: $goal (Goal $oldGv $oldDgv)) (: $goal (Goal $oldGv $value)))
+              )
+    )
+   )
 
