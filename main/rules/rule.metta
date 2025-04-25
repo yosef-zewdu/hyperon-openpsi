@@ -141,7 +141,7 @@
 
 ;This function accepts an optional third argument,
 ;dgv(desiredGoalValue), if () is passed then a default value of 1.0 is used.
-;returns the symbol representing the added goal
+;Returns the symbol representing the added goal.
 (: addGoal (-> Symbol Number Atom Atom))
 (= (addGoal $name $value $dgv)
    (if (== () $dgv) 
