@@ -1,8 +1,10 @@
 
 !(bind! &emotion-space (new-space))
+(: Emotion Type)
+(: emotion (-> Atom Emotion))
 (= (create-emotion $emotion)
-    (add-atom &emotion-space $emotion)
-
+    (unify $emotion (emotion $x) (add-atom &emotion-space $emotion) (Error Wrong Format))
+    
 )
 
 (= (get-emotions)
