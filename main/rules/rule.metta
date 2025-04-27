@@ -170,3 +170,7 @@
     )
    )
 
+(= (goal-value $goal)
+    (unify $goal (Goal $x $goal) $goal (ERROR the goal is incorrect format))
+)
+
