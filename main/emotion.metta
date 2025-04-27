@@ -22,10 +22,10 @@
 (= (create-emotion $emotion-space $emotion)
     (unify $emotion (emotion $y $x)
             (if (isAvailable? $emotion-space $emotion)
-                (Error is Available)
+                (ERROR is Available)
                 (add-atom &emotion-space $emotion) 
             )
-            (Error Wrong Format)
+            (ERROR Wrong Format)
     )
     
 )
