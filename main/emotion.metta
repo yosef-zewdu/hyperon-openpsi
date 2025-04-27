@@ -1,5 +1,5 @@
-!(register-module! ../utilities-module)
-!(import! &self utilities-module:utils)
+;; !(register-module! ../utilities-module)
+;; !(import! &self utilities-module:utils)
 
 !(bind! &emotion-space (new-space))
 
@@ -21,8 +21,9 @@
 (= (isAvailable?  $emotion-space $emotion)
     (let* (
         ((emotion $x $y) $emotion)
-        ($emotions (get-emotions)) 
+        ($emotions (get-emotions $emotion-space)) 
         ($emotStrings (collapse (getEmotionString $emotions)))
+        (() (println! (emotStrings $emotStrings)))
     )
         (isMember $x $emotStrings)  
     )
@@ -35,7 +36,7 @@
     (unify $emotion (emotion $y $x)
             (if (isAvailable? $emotion-space $emotion)
                 (ERROR is Available)
-                (add-atom &emotion-space $emotion) 
+                (add-atom $emotion-space $emotion) 
             )
             (ERROR Wrong Format)
     )
@@ -56,6 +57,6 @@
 ;; !(isAvailable? &emotion-space (emotion anger 0))
 ;; !(match &emotion-space $x $x)
 ;; !(create-emotion &emotion-space data)
-;; !(get-emotions)
-;; !(getEmotionString (get-emotions))
+;; !(get-emotions &emotion-space)
+;; !(getEmotionString (get-emotions &emotion-space))
 ;; !(get-atoms &emotion-space)
