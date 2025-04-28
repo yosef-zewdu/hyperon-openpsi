@@ -174,3 +174,24 @@
     (unify $goal (Goal $x $goal) $goal (ERROR the goal is incorrect format))
 )
 
+
+
+(= (cogTvMean ($tv $val $conf))
+    (/ (+ $val $conf) 2)
+)
+(= (cogTvConfidence ($tv $val $conf))
+  $conf
+)
+(= (min $head $tail) (if (< $head $tail) $head $tail))
+(= (contextStv $stvList)
+    (let* (
+      ($firDegree (collapse (cogTvMean (superpose $stvList))))
+      ($secDegree (collapse (cogTvConfidence (superpose $stvList))))
+      ($firResult (foldl * 1 $firDegree))
+      ($secResult (foldl min 1 $secDegree))
+      
+    )
+      (stv $firResult $secResult)
+    )
+)
+!(contextStv ((stv 0.5 0.4) (stv 0.6 0.8)))
