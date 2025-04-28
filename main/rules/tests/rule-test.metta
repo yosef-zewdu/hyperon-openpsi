@@ -40,3 +40,7 @@
 !(setDgv run 0.1)
 
 !(assertEqual (get-type run) (Goal 0.5 0.1))
+!(assertEqual (contextStv ((stv 0.5 0.4) (stv 0.6 0.8))) (stv 0.315 0.4))
+!(assertEqual (contextStv ((stv 1 1) (stv 1 1))) (stv 1.0 1.0))
+!(assertEqual (contextStv ((stv 0 0) (stv 0 0))) (stv 0 0))
+
