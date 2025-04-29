@@ -1,4 +1,4 @@
-!(bind! &demandSpace (new-space))
+!(bind! &demandspace (new-space))
 !(bind! &cacheSpace (new-space))
 
 (: Demand Type)
@@ -6,7 +6,7 @@
 ; (: demand (-> Symbol Number Demand))
 (: skip (-> Symbol SkipDemand))
 
-(: addDemand (-> hyperon::space::DynSpace Symbol Number Demand))
+; (: addDemand (-> hyperon::space::DynSpace Symbol Number Demand))
 (= (addDemand $space $name $value)
     (let* (
         ($demand (demand $name $value))
@@ -25,7 +25,7 @@
     (collapse (match $space (demand $x $_) (demand $x $_)))
 )
 
-!(add-reduct &demandSpace (superpose (
+!(add-reduct &demandspace (superpose (
         (demand energy 0.5)
         (demand affiliation 0.5)
         (demand competence 0.5)
@@ -46,7 +46,7 @@
 )
 
 
-; !(add-reduct &demandSpace (superpose (
+; !(add-reduct &demandspace (superpose (
 ;         (skip competence 0.5)
 ; )))
 
@@ -84,7 +84,7 @@
 !(getEnabledDemands)
 
 
-!(get-atoms &demandSpace)
+!(get-atoms &demandspace)
 
 
 
