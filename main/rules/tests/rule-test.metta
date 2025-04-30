@@ -5,6 +5,8 @@
 !(import! &self hyperon-openpsi:main:types)
 !(import! &self utilities-module:utils)
 
+!(addAndLink (a b) c)
+!(assertEqual (addAndLink (a b) c) (AND_LINK ((a b) c)))
 ;if rule is added with the addRule function then the &psiRules index knows 
 ;about it
 
@@ -40,3 +42,5 @@
 !(setDgv run 0.1)
 
 !(assertEqual (get-type run) (Goal 0.5 0.1))
+
+
