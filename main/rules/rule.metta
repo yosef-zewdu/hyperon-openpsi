@@ -179,24 +179,29 @@
 (= (cogTvMean ($tv $val $conf))
     (/ (+ $val $conf) 2)
 )
+
 (= (cogTvConfidence ($tv $val $conf))
   $conf
 )
+
 (= (min $head $tail) (if (< $head $tail) $head $tail))
+
+
 (= (contextStv $stvList)
     (let* (
       ($firDegree (collapse (cogTvMean (superpose $stvList))))
       ($secDegree (collapse (cogTvConfidence (superpose $stvList))))
-      ;; (() (println! (firDegree $firDegree)))
-      ;; (() (println! (secDegree $secDegree)))
       ($firResult (foldr * 1 $firDegree))
-      ;; (() (println! (firResult $firResult)))
       ($secResult (foldr min 1 $secDegree))
-      ;; (() (println! (secResult $secResult)))
+    
     )
       (stv $firResult $secResult)
     )
 )
+(= (isSatisfiable $rule $satisfiableChecker)
+    (== (stv 1 1)  ($satisfiableChecker $rule))
+)
+;; (= (checkSatisfiability))
 ;; !(foldl * 1 (1 2 3 4 5))
 ;; !(foldl min 1 (1 2 3 4 5))
 ;; !(contextStv ((stv 0.5 0.4) (stv 0.6 0.8)))
