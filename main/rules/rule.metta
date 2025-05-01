@@ -30,7 +30,7 @@
                     ($newRule (: $handle (IMPLICATION_LINK $andLink $goal)))
                     ($_ (add-atom &self $newRule))
                   )
-                    ($andLink $rule)
+                  ($andLink $rule)
             )
       )
      )
@@ -48,7 +48,7 @@
               ($exists (existsIn (PsiRules) $rule))
             )
               (if $exists 
-                  (: $ruleHandle (getRuleType $ruleHandle))
+                  $ruleHandle
                   (
                     let* (
                           ($newRule (: $ruleHandle (IMPLICATION_LINK $andLink $goal)))
@@ -60,7 +60,7 @@
                           ($_ (add-atom &self (isExecuted $ruleHandle (FALSE_TV))))
                           (() (update-atom (PsiRules) $rule $newRule))
                         )
-                        (: $ruleHandle (getRuleType $ruleHandle))
+                        $ruleHandle
                   )
                 )
     )
