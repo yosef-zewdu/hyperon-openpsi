@@ -18,6 +18,17 @@
     )
 )
 
+(= (checkSatisfier $rule $satisfiabilityCache)
+    (let* (
+        ($caches (collapse (get-atoms $satisfiabilityCache)))
+        ($truthValues (collapse (unify $rule (superpose $caches) True False)))
+        
+    ) 
+        (any $truthValues)
+    )
+
+)
+
 (= (satisfy $satisfiabilityCache $rule)
     (let* ( 
         ($query (changeRuleToQuery $rule))
@@ -27,6 +38,8 @@
         (add-atom $satisfiabilityCache (: $handle $query))
     )
 )
+
+
 
 (= (checkSatisfiability $rule $satisfiabilityCache $ruleSpace)
     (let* ( 
@@ -41,7 +54,7 @@
                 ($_ (satisfy $satisfiabilityCache $rule))
 
             )
-                
+
             )
 
         )
