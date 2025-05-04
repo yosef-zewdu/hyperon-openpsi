@@ -1,4 +1,5 @@
 !(bind! &psiRules (new-space))
+!(bind! &categoryIndex (new-space))
 
 (= (FALSE_TV) (False (STV 0.0 1.0))) ;False, with Maximum confidence
 (= (TRUE_TV) (True (STV 1.0 1.0))) ;True, with Maximum confidence
@@ -170,3 +171,49 @@
     )
    )
 
+
+;Declare a new category by adding the following structured atom into the
+;atomspace
+;        (: CategoryName Category)
+;
+;Such categorization is helpful in defining custom behaviors per category.
+;
+;arg: newCategory The node reprsenting the new category.
+;return: Node that represents the category.
+
+(: addCategory (-> Symbol Atom))
+(= (addCategory $newCategory)
+   (if (not (existsIn &categoryIndex $newCategory))
+     (let () 
+       (add-atom &categoryIndex (: $newCategory Category))
+       $newCategory
+       )
+      $newCategory
+     )
+   )
+
+;Add a node to a category. The representation is as follows
+;   (isA rule category)
+;
+;arg1: rule A rule to be categorized.
+;arg2: category An atom that represents the category.
+;return: The rule that was passed in.
+   
+(: addToCategory (-> Symbol Symbol Atom))
+(= (addToCategory $rule $category)
+   (let* (
+        ($catgry (addCategory $category)) ; add the category incase it hasn't been added
+        ($rulePred (isA $rule $category))
+      )
+     (if (not (isMember $rulePred (collapse (get-atoms &categoryIndex))))
+          (let () (add-atom &categoryIndex $rulePred) $rule)
+          (addToCategory: Rule $rule Already Exists in $category))
+    )
+   )
+
+;Returns all the categories that were added using add_to_category.
+;
+;return: A tuple of symbols that represent the categories.
+
+(: getCategories (->) Atom)
+(= (getCategories) (collapse (match &categoryIndex (: $category Category) $category)) )
