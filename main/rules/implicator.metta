@@ -26,18 +26,24 @@
     )
 )
 
+(= (checkSatisfier' $rule $cacheInstance)
+    (unify $rule $cacheInstance True False)
+)
+
 ;;checks if the rules pattern exists in the satisfiability cache
 ;;The satisfiability cache is a space to cache already grounded satisfiable code.
 (= (checkSatisfier $rule $satisfiabilityCache)
     (let* (
         ($caches (collapse (get-atoms $satisfiabilityCache)))
-        ($truthValues (collapse (unify $rule (superpose $caches) True False)))
-        
+        ($_ (println! (caches $caches)))
+        ($truthValues (collapse (checkSatisfier' $rule (superpose $caches))))
+        (() (println! (truthValues $truthValues)))
     ) 
         (any $truthValues)
     )
 
 )
+
 ;;Implements a simple grounding mechanism for metta
 (= (satisfy $satisfiabilityCache $rule)
     (let* ( 
@@ -47,24 +53,53 @@
     
     )
         (if $exists
-            (empty)
-            (add-atom $satisfiabilityCache ($handle $query))
+            ()
+            (add-atom $satisfiabilityCache $query)
         )
     )
 )
 
+(=(removeBasedOnPattern $pattern $space-pattern $space)
+    (unify pattern $space-pattern
+    (let* (
+        ($_ (remove-atom $space $space-pattern))
+        ($_ (println! (hi)))
+        
+    )
+        (empty)
+    ) 
+    (empty)
+    )
+)
+
+(=(removeBasedOnPatternList $pattern $patternList $space)
+    (if (== () $patternList)
+        ()
+        (let* (
+            (($head $tail) (decons-atom $patternList))
+            ($_ (println! (headonRemove $head)))
+            ($_ (collapse (removeBasedOnPattern $pattern $head $space)))
+        )
+            (removeBasedOnPatternList $pattern $tail $space)
+        )
+    )
+)
 
 ;; checks if a rule is grounded.
 (= (checkSatisfiability $rule $satisfiabilityCache)
     (let* ( 
         ($query (changeRuleToQuery $rule))
-        ($handle (cadr-atom $rule))
-
+        ($_ (println! (query $query)))
+        ($caches (collapse (get-atoms $satisfiabilityCache)))
+        ($handle (car-atom $rule))
+        ($_ (println! (handle $handle)))
     )
        (if (== (car-atom $query) ERROR)
             (FALSE_TV)
             (let* (
-                ($_ (remove-atom $satisfiabilityCache ($handle $query)))
+                ($_ (println! (primary (collapse (get-atoms $satisfiabilityCache)))))
+                ($_ (removeBasedOnPatternList  $query $caches $satisfiabilityCache))
+                ($_ (println! (modified (collapse (get-atoms $satisfiabilityCache)))))
                 ($_ (satisfy $satisfiabilityCache $rule))
 
             )
@@ -82,6 +117,6 @@
 ;;         Tests for implicator    ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 !(satisfy &satisfiabilityCache (x ((TTV 1 (STV 0.5 0.6)) (IMPLICATION_LINK (AND_LINK ((x y) act)) (y)))))
-(((TTV 1 (STV 0.5 0.6)) (IMPLICATION_LINK (AND_LINK ((x y) act)) (y))) (ERROR The rule doesn't exist))
+!(checkSatisfiability (x ((TTV 1 (STV 0.5 0.6)) (IMPLICATION_LINK (AND_LINK ((x y) act)) (y)))) &satisfiabilityCache)
 !(get-atoms &satisfiabilityCache)
 
