@@ -46,4 +46,4 @@
 
 !(assertEqual (get-type run) (Goal 0.5 0.1))
 
-!(relatedGoals y)
+!(assertEqual (relatedGoals y) (z))
