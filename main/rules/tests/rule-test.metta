@@ -47,3 +47,11 @@
 !(assertEqual (get-type run) (Goal 0.5 0.1))
 
 
+;Category tests
+!(assertEqual (addCategory testI) testI)
+
+!(assertEqual (addToCategory x testII) x)
+!(assertEqual (addToCategory x testII )(addToCategory: Rule x Already Exists in testII))
+
+!(assertEqual (len (getCategories)) 2)
+
