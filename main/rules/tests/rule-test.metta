@@ -40,3 +40,5 @@
 !(setDgv run 0.1)
 
 !(assertEqual (get-type run) (Goal 0.5 0.1))
+
+!(relatedGoals y)

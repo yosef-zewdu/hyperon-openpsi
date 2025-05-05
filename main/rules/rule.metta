@@ -169,4 +169,46 @@
               )
     )
    )
+;Find AndLink nodes connected to action:
+;
+;(cog-incoming-by-type action 'AndLink) fetches all AndLink atoms directly referencing the action node.
+;
+;Collect PSI rules (ImplicationLinks) targeting these AndLinks:
+;
+;For each AndLink, get all ImplicationLink atoms pointing to it.
+;
+;Filter these to keep only valid PSI rules (psi-rule? predicate).
+;
+;Extract goals and deduplicate:
+;
+;Use psi-get-goal to extract the goal from each PSI rule.
+;
+;Remove duplicates with delete-duplicates.
 
+(= (filterPsiRules $andLink $acc)
+   (if (not (== $andLink ()))
+      (let* (
+              ($and (car-atom $andLink))
+              ($rest (cdr-atom $andLink))
+              ($rules (match &psiRules (IMPLICATION_LINK $and $goal) (IMPLICATION_LINK $and $goal)))
+              ($res (filterPsiRules $rest (concatTuple $rules $acc)))
+            )
+        (if (== $and ())
+          $acc
+          $res
+          )
+        )
+      ()
+   )
+  )
+
+(= (relatedGoals $action)
+   (let* (
+
+          ($andLinks (match &self (AND_LINK ($context $action)) (AND_LINK ($context $action))))
+          (() (println! ($andLinks)))
+          ($rules (filterPsiRules $andLinks ()))
+        )
+        $rules
+    )
+   )
