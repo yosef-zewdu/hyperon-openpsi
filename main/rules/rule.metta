@@ -7,11 +7,12 @@
 
 (: addAndLink (-> Atom Symbol Atom))
 (= (addAndLink $context $action)
-   (let* (
-          ($andLink (AND_LINK ($context $action)))
-          ($_ (add-atom &self $andLink))
+   (let $res 
+        (collapse (match &self (AND_LINK ($context $action)) (AND_LINK ($context $action))))
+        (if (not (== $res ()))
+          (car-atom $res)
+          (let () (add-atom &self (AND_LINK ($context $action))) (AND_LINK ($context $action)))
         )
-        $andLink
      )
 )
 
@@ -21,17 +22,16 @@
      (
       ($andLink (addAndLink $context $action))
       ($rule (collapse (match &self (: $handle (IMPLICATION_LINK $andLink $goal)) (: $handle (IMPLICATION_LINK $andLink $goal)))))
-      ($condition (== (len $rule) 0))
     )
-      (if $condition 
+      (if (not (== $rule ())) 
+            ($andLink (car-atom $rule)) 
             (
               let* (
                     ($newRule (: $handle (IMPLICATION_LINK $andLink $goal)))
                     ($_ (add-atom &self $newRule))
                   )
-                    ($andLink $rule)
+                  ($andLink $rule)
             )
-            ($andLink (car-atom $rule)) 
       )
      )
 )
@@ -48,15 +48,19 @@
               ($exists (existsIn (PsiRules) $rule))
             )
               (if $exists 
-                  (: $ruleHandle (getRuleType $ruleHandle))
+                  $ruleHandle
                   (
                     let* (
                           ($newRule (: $ruleHandle (IMPLICATION_LINK $andLink $goal)))
-                          ($_ (add-atom (PsiRules) (: $ruleHandle $tv)))
+                          ($_ (let $res (getRuleType $ruleHandle) (if (not (== (len $res) 2)) ; Important to avoid adding another $tv to $ruleHandle as type.
+                                                                    (add-atom (PsiRules) (: $ruleHandle $tv))
+                                                                    ;(println! (tv already added)) ;TODO: decide what happens in this case.
+                                                                    ()
+                                                                   )))
                           ($_ (add-atom &self (isExecuted $ruleHandle (FALSE_TV))))
                           (() (update-atom (PsiRules) $rule $newRule))
                         )
-                        (: $ruleHandle (getRuleType $ruleHandle))
+                        $ruleHandle
                   )
                 )
     )
@@ -142,7 +146,7 @@
 ;This function accepts an optional third argument,
 ;dgv(desiredGoalValue), if () is passed then a default value of 1.0 is used.
 ;Returns the symbol representing the added goal.
-(: addGoal (-> Symbol Number Atom Atom))
+(: addGoal (-> Atom Number Atom Atom))
 (= (addGoal $name $value $dgv)
    (if (== () $dgv) 
       (addGoalHelper $name $value 1.0) 
