@@ -79,7 +79,7 @@
    )
 )
 
-(: getGoal (-> Atom Atom))
+;(: getGoal (-> Atom Atom))
 (= (getGoal $rule)  
   ( 
    case (getRuleType $rule) 
@@ -173,46 +173,63 @@
               )
     )
    )
-;Find AndLink nodes connected to action:
-;
-;(cog-incoming-by-type action 'AndLink) fetches all AndLink atoms directly referencing the action node.
-;
-;Collect PSI rules (ImplicationLinks) targeting these AndLinks:
-;
-;For each AndLink, get all ImplicationLink atoms pointing to it.
-;
-;Filter these to keep only valid PSI rules (psi-rule? predicate).
-;
-;Extract goals and deduplicate:
-;
-;Use psi-get-goal to extract the goal from each PSI rule.
-;
-;Remove duplicates with delete-duplicates.
 
-(= (filterPsiRules $andLink $acc)
-   (if (not (== $andLink ()))
+;For each AndLink, get all ImplicationLink atoms pointing to it.
+;Filter these to keep only valid PSI rules using the isRule predicate function.
+;arg1: a tuple of andLinks
+;arg2: an accumulator
+;return: a tuple of valid psiRules
+
+(= (filterPsiRules $andLinks $acc)
+   (if (== $andLinks ())
+      $acc
       (let* (
-              ($and (car-atom $andLink))
-              ($rest (cdr-atom $andLink))
-              ($rules (match &psiRules (IMPLICATION_LINK $and $goal) (IMPLICATION_LINK $and $goal)))
-              ($res (filterPsiRules $rest (concatTuple $rules $acc)))
+              ($head (car-atom $andLinks))
+              ($tail (cdr-atom $andLinks))
+              ($handles (collapse (match &psiRules (: $handle (IMPLICATION_LINK $head $goal)) $handle)))
+              ($rulesList (concatTuple $handles $acc))
+              ($res (filterPsiRules $tail $rulesList))
+              ;(() (println! (filter-psi-rules $rules $res)))
             )
-        (if (== $and ())
+        (if (== $head ())
           $acc
           $res
           )
         )
-      ()
    )
   )
 
+(= (isRule $rule) (existsIn (PsiRules) $rule))
+
+(= (collectGoals $rules $acc)
+   (if (== $rules ())
+      $acc
+      (let $next (car-atom $rules) 
+        (if (== $next ()) 
+          $acc 
+          (collectGoals 
+            (cdr-atom $rules) 
+            (concatTuple (collapse (getGoal $next)) $acc)
+            )
+          )
+        )
+    )
+   )
+
+;Returns a list of all of the goals that are associated with an action, which
+;is passed to it as arg.A goal is associated with an action whenever the goal appears in
+;a psi-rule with that action in it.
+;arg: action
+;returns: a tuple of goals
+
 (= (relatedGoals $action)
    (let* (
-
-          ($andLinks (match &self (AND_LINK ($context $action)) (AND_LINK ($context $action))))
-          (() (println! ($andLinks)))
+          ($andLinks (collapse (match &self (AND_LINK ($context $action)) (AND_LINK ($context $action)))))
           ($rules (filterPsiRules $andLinks ()))
+          ($filtered (collectGoals $rules ()))
+          ;(() (println! (relatedGoals $rules $filtered)))
+          ($res (collapse (unique (superpose $filtered)))) ; remove duplicate goals
         )
-        $rules
-    )
+        $res
+      )
    )
