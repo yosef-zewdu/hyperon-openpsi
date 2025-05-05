@@ -209,7 +209,7 @@
           $acc 
           (collectGoals 
             (cdr-atom $rules) 
-            (concatTuple (collapse (getGoal $next)) $acc)
+            (appendAtom (getGoal $next) $acc)
             )
           )
         )
