@@ -181,7 +181,6 @@
 ;arg: newCategory The node reprsenting the new category.
 ;return: Node that represents the category.
 
-(: addCategory (-> Symbol Atom))
 (= (addCategory $newCategory)
    (if (not (existsIn &categoryIndex $newCategory))
      (let () 
@@ -199,7 +198,6 @@
 ;arg2: category An atom that represents the category.
 ;return: The rule that was passed in.
    
-(: addToCategory (-> Symbol Symbol Atom))
 (= (addToCategory $rule $category)
    (let* (
         ($catgry (addCategory $category)) ; add the category incase it hasn't been added
