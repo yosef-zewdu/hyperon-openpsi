@@ -6,7 +6,7 @@
 
 (= (PsiRules) &psiRules)
 
-;(: addAndLink (-> Atom Symbol Atom))
+(: addAndLink (-> Expression Action Expression))
 (= (addAndLink $context $action)
    (let $res 
         (collapse (match &self (AND_LINK ($context $action)) (AND_LINK ($context $action))))
@@ -17,7 +17,7 @@
      )
 )
 
-;(: addRuleLink (-> Symbol Expression Symbol Symbol Expression))
+(: addRuleLink (-> Symbol Goal Expression Expression))
 (= (addRuleLink $handle $goal $andLink)
    (let*
      (
@@ -43,7 +43,7 @@
    ( let $res (collapse (get-type-space $space $atom)) (not (== (%Undefined%) $res)) )
 )
 
-;(: addRule (-> Symbol Atom Symbol Symbol Atom Atom))
+(: addRule (-> Symbol Expression Action Symbol Goal Expression))
 (= (addRule $ruleHandle $context $action $goal $tv)
     (let* (
             ($andLink (addAndLink $context $action))
@@ -71,7 +71,7 @@
     )
 )
  
-;(: getAction (-> Atom Atom))
+(: getAction (-> Symbol Expression))
 (= (getAction $rule) 
    (
     case (getRuleType $rule &self) 
@@ -84,7 +84,7 @@
    )
 )
 
-;(: getGoal (-> Atom Atom))
+(: getGoal (-> Symbol Expression))
 (= (getGoal $rule)  
   ( 
    case (getRuleType $rule &self) 
@@ -97,7 +97,7 @@
    )
 )
 
-;(: getContext (-> Atom Atom))
+(: getContext (-> Symbol Expression))
 (= (getContext $rule)
    (
     case (getRuleType $rule &self) 
@@ -114,7 +114,7 @@
 
 (= (getRuleType $id $space) (collapse (get-type-space $space $id)))
 
-;(: getTV (-> Atom Atom))
+(: getTV (-> Symbol Expression))
 (= (getTV $id) 
    (
     case (getRuleType $id &self)
@@ -150,7 +150,7 @@
 ;This function accepts an optional third argument,
 ;dgv(desiredGoalValue), if () is passed then a default value of 1.0 is used.
 ;Returns the symbol representing the added goal.
-;(: addGoal (-> Atom Number Atom Atom))
+(: addGoal (-> Symbol Number Atom Expression))
 (= (addGoal $name $value $dgv)
    (if (== () $dgv) 
       (addGoalHelper $name $value 1.0) 
@@ -188,6 +188,7 @@
 ;arg: newCategory The node reprsenting the new category.
 ;return: Node that represents the category.
 
+(: addCategory (-> Symbol Expression))
 (= (addCategory $newCategory)
    (if (not (existsIn &categoryIndex $newCategory))
      (let () 
@@ -204,7 +205,8 @@
 ;arg1: rule A rule to be categorized.
 ;arg2: category An atom that represents the category.
 ;return: The rule that was passed in.
-   
+ 
+(: addToCategory (-> Symbol Symbol Expression))
 (= (addToCategory $rule $category)
    (let* (
         ($catgry (addCategory $category)) ; add the category incase it hasn't been added
@@ -220,5 +222,5 @@
 ;
 ;return: A tuple of symbols that represent the categories.
 
-(: getCategories (->) Atom)
+(: getCategories (->) Expression)
 (= (getCategories) (collapse (match &categoryIndex (: $category Category) $category)) )
