@@ -1,4 +1,5 @@
 !(bind! &psiRules (new-space))
+!(bind! &categoryIndex (new-space))
 
 (= (FALSE_TV) (False (STV 0.0 1.0))) ;False, with Maximum confidence
 (= (TRUE_TV) (True (STV 1.0 1.0))) ;True, with Maximum confidence
@@ -7,11 +8,12 @@
 
 (: addAndLink (-> Atom Symbol Atom))
 (= (addAndLink $context $action)
-   (let* (
-          ($andLink (AND_LINK ($context $action)))
-          ($_ (add-atom &self $andLink))
+   (let $res 
+        (collapse (match &self (AND_LINK ($context $action)) (AND_LINK ($context $action))))
+        (if (not (== $res ()))
+          (car-atom $res)
+          (let () (add-atom &self (AND_LINK ($context $action))) (AND_LINK ($context $action)))
         )
-        $andLink
      )
 )
 
@@ -21,17 +23,16 @@
      (
       ($andLink (addAndLink $context $action))
       ($rule (collapse (match &self (: $handle (IMPLICATION_LINK $andLink $goal)) (: $handle (IMPLICATION_LINK $andLink $goal)))))
-      ($condition (== (len $rule) 0))
     )
-      (if $condition 
+      (if (not (== $rule ())) 
+            ($andLink (car-atom $rule)) 
             (
               let* (
                     ($newRule (: $handle (IMPLICATION_LINK $andLink $goal)))
                     ($_ (add-atom &self $newRule))
                   )
-                    ($andLink $rule)
+                  ($andLink $rule)
             )
-            ($andLink (car-atom $rule)) 
       )
      )
 )
@@ -48,15 +49,19 @@
               ($exists (existsIn (PsiRules) $rule))
             )
               (if $exists 
-                  (: $ruleHandle (getRuleType $ruleHandle))
+                  $ruleHandle
                   (
                     let* (
                           ($newRule (: $ruleHandle (IMPLICATION_LINK $andLink $goal)))
-                          ($_ (add-atom (PsiRules) (: $ruleHandle $tv)))
+                          ($_ (let $res (getRuleType $ruleHandle) (if (not (== (len $res) 2)) ; Important to avoid adding another $tv to $ruleHandle as type.
+                                                                    (add-atom (PsiRules) (: $ruleHandle $tv))
+                                                                    ;(println! (tv already added)) ;TODO: decide what happens in this case.
+                                                                    ()
+                                                                   )))
                           ($_ (add-atom &self (isExecuted $ruleHandle (FALSE_TV))))
                           (() (update-atom (PsiRules) $rule $newRule))
                         )
-                        (: $ruleHandle (getRuleType $ruleHandle))
+                        $ruleHandle
                   )
                 )
     )
@@ -142,7 +147,7 @@
 ;This function accepts an optional third argument,
 ;dgv(desiredGoalValue), if () is passed then a default value of 1.0 is used.
 ;Returns the symbol representing the added goal.
-(: addGoal (-> Symbol Number Atom Atom))
+(: addGoal (-> Atom Number Atom Atom))
 (= (addGoal $name $value $dgv)
    (if (== () $dgv) 
       (addGoalHelper $name $value 1.0) 
@@ -170,6 +175,50 @@
     )
    )
 
+
+;Declare a new category by adding the following structured atom into the
+;atomspace
+;        (: CategoryName Category)
+;
+;Such categorization is helpful in defining custom behaviors per category.
+;
+;arg: newCategory The node reprsenting the new category.
+;return: Node that represents the category.
+
+(= (addCategory $newCategory)
+   (if (not (existsIn &categoryIndex $newCategory))
+     (let () 
+       (add-atom &categoryIndex (: $newCategory Category))
+       $newCategory
+       )
+      $newCategory
+     )
+   )
+
+;Add a node to a category. The representation is as follows
+;   (isA rule category)
+;
+;arg1: rule A rule to be categorized.
+;arg2: category An atom that represents the category.
+;return: The rule that was passed in.
+   
+(= (addToCategory $rule $category)
+   (let* (
+        ($catgry (addCategory $category)) ; add the category incase it hasn't been added
+        ($rulePred (isA $rule $category))
+      )
+     (if (not (isMember $rulePred (collapse (get-atoms &categoryIndex))))
+          (let () (add-atom &categoryIndex $rulePred) $rule)
+          (addToCategory: Rule $rule Already Exists in $category))
+    )
+   )
+
+;Returns all the categories that were added using add_to_category.
+;
+;return: A tuple of symbols that represent the categories.
+
+(: getCategories (->) Atom)
+(= (getCategories) (collapse (match &categoryIndex (: $category Category) $category)) )
 (= (goal-value $goal)
     (unify $goal (Goal $x $goal) $goal (ERROR the goal is incorrect format))
 )

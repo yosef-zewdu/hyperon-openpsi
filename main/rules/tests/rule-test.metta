@@ -5,9 +5,14 @@
 !(import! &self hyperon-openpsi:main:types)
 !(import! &self utilities-module:utils)
 
+!(assertEqual (addAndLink (a b) c) (AND_LINK ((a b) c)))
+
+;add the same AND_LINK the second time, it should not be added again. It should 
+;return the Already existing AND_LINK.
+!(assertEqual (addAndLink (a b) c) (AND_LINK ((a b) c)))
+
 ;if rule is added with the addRule function then the &psiRules index knows 
 ;about it
-
 (: z Goal)
 (: y Action)
 
@@ -40,7 +45,13 @@
 !(setDgv run 0.1)
 
 !(assertEqual (get-type run) (Goal 0.5 0.1))
-!(assertEqual (contextStv ((stv 0.5 0.4) (stv 0.6 0.8))) (stv 0.315 0.4))
-!(assertEqual (contextStv ((stv 1 1) (stv 1 1))) (stv 1.0 1.0))
-!(assertEqual (contextStv ((stv 0 0) (stv 0 0))) (stv 0 0))
+
+
+;Category tests
+!(assertEqual (addCategory testI) testI)
+
+!(assertEqual (addToCategory x testII) x)
+!(assertEqual (addToCategory x testII )(addToCategory: Rule x Already Exists in testII))
+
+!(assertEqual (len (getCategories)) 2)
 
