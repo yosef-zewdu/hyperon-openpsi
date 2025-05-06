@@ -1,7 +1,7 @@
-!(register-module! ../../utilities-module)
-!(register-module! ../../../hyperon-openpsi)
-!(import! &self utilities-module:utils)
-!(import! &self hyperon-openpsi:main:rules:rule)
+;; !(register-module! ../../utilities-module)
+;; !(register-module! ../../../hyperon-openpsi)
+;; !(import! &self utilities-module:utils)
+;; !(import! &self hyperon-openpsi:main:rules:rule)
 !(bind! &satisfiabilityCache (new-space))
 
 
@@ -26,6 +26,10 @@
     )
 )
 
+
+;;This function is a function that can be used as a helper for 
+;; one instance which is used as a helper function for checkSatisfier
+;; which works with a list.
 (= (checkSatisfier' $rule $cacheInstance)
     (unify $rule $cacheInstance True False)
 )
@@ -68,7 +72,7 @@
     )
         (empty)
     ) 
-    (empty)
+        (empty)
     )
 )
 
@@ -116,7 +120,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;         Tests for implicator    ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-!(satisfy &satisfiabilityCache (x ((TTV 1 (STV 0.5 0.6)) (IMPLICATION_LINK (AND_LINK ((x y) act)) (y)))))
-!(checkSatisfiability (x ((TTV 1 (STV 0.5 0.6)) (IMPLICATION_LINK (AND_LINK ((x y) act)) (y)))) &satisfiabilityCache)
-!(get-atoms &satisfiabilityCache)
+;; !(satisfy &satisfiabilityCache (x ((TTV 1 (STV 0.5 0.6)) (IMPLICATION_LINK (AND_LINK ((x y) act)) (y)))))
+;;  !(checkSatisfiability (x ((TTV 1 (STV 0.5 0.6)) (IMPLICATION_LINK (AND_LINK ((x y) act)) (y)))) &satisfiabilityCache)
+;; !(get-atoms &satisfiabilityCache)
+!(changeRuleToQuery (x ((TTV 1 (STV 0.5 0.6)) (IMPLICATION_LINK (AND_LINK ((x y) act)) (y)))))
 
