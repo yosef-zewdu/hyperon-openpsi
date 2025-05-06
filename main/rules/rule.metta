@@ -6,7 +6,7 @@
 
 (= (PsiRules) &psiRules)
 
-(: addAndLink (-> Atom Symbol Atom))
+;(: addAndLink (-> Atom Symbol Atom))
 (= (addAndLink $context $action)
    (let $res 
         (collapse (match &self (AND_LINK ($context $action)) (AND_LINK ($context $action))))
@@ -17,21 +17,22 @@
      )
 )
 
-(: addRuleLink (-> Symbol Expression Symbol Symbol Expression))
-(= (addRuleLink $handle $context $action $goal)
+;(: addRuleLink (-> Symbol Expression Symbol Symbol Expression))
+(= (addRuleLink $handle $goal $andLink)
    (let*
      (
-      ($andLink (addAndLink $context $action))
-      ($rule (collapse (match &self (: $handle (IMPLICATION_LINK $andLink $goal)) (: $handle (IMPLICATION_LINK $andLink $goal)))))
-    )
-      (if (not (== $rule ())) 
-            ($andLink (car-atom $rule)) 
+      ($rule (collapse (get-type $handle)))
+      )
+      (if (not (== $rule (%Undefined%))) 
+            () 
             (
               let* (
                     ($newRule (: $handle (IMPLICATION_LINK $andLink $goal)))
                     ($_ (add-atom &self $newRule))
+                    ($_ (add-atom &self (: $handle (TTV 0 (STV 0.0 0.0)))))
+                    ($_ (add-atom &self (isExecuted $handle (DEFAULT_TV)))) ;TODO: define DEFAULT_TV
                   )
-                  ($andLink $rule)
+                  ()
             )
       )
      )
@@ -42,35 +43,38 @@
    ( let $res (collapse (get-type-space $space $atom)) (not (== (%Undefined%) $res)) )
 )
 
-(: addRule (-> Symbol Atom Symbol Symbol Atom Atom))
+;(: addRule (-> Symbol Atom Symbol Symbol Atom Atom))
 (= (addRule $ruleHandle $context $action $goal $tv)
     (let* (
-              (($andLink $rule) (addRuleLink $ruleHandle $context $action $goal))
-              ($exists (existsIn (PsiRules) $rule))
-            )
-              (if $exists 
-                  $ruleHandle
-                  (
-                    let* (
-                          ($newRule (: $ruleHandle (IMPLICATION_LINK $andLink $goal)))
-                          ($_ (let $res (getRuleType $ruleHandle) (if (not (== (len $res) 2)) ; Important to avoid adding another $tv to $ruleHandle as type.
-                                                                    (add-atom (PsiRules) (: $ruleHandle $tv))
-                                                                    ;(println! (tv already added)) ;TODO: decide what happens in this case.
-                                                                    ()
-                                                                   )))
-                          ($_ (add-atom &self (isExecuted $ruleHandle (FALSE_TV))))
-                          (() (update-atom (PsiRules) $rule $newRule))
-                        )
-                        $ruleHandle
-                  )
+            ($andLink (addAndLink $context $action))
+            ($_ (addRuleLink $ruleHandle $goal $andLink))
+            ($exists (existsIn &psiRules $ruleHandle))
+          )
+          (if $exists 
+              $ruleHandle
+              (let* 
+                (
+                  ($res (getRuleType $ruleHandle &self))
+                  ($_ (if (== (len $res) 2) ; Important to avoid adding another $tv to $ruleHandle as type.
+                          (update-atom &self (: $ruleHandle (TTV 0 (STV 0.0 0.0))) (: $ruleHandle $tv)) 
+                          () ))
+                  ($_ (update-atom &self (isExecuted $ruleHandle (DEFAULT_TV)) (isExecuted $ruleHandle (FALSE_TV))))
                 )
+                (let () (if (== (len $context) 1)
+                    (add-atom &psiRules (: $ruleHandle ($context $action $goal (car-atom $context))))
+                    (add-atom &psiRules (: $ruleHandle ($context $action $goal (AND_LINK $context))))
+                  )
+                  $ruleHandle
+                )
+              )
+          )
     )
 )
  
-(: getAction (-> Atom Atom))
+;(: getAction (-> Atom Atom))
 (= (getAction $rule) 
    (
-    case (getRuleType $rule) 
+    case (getRuleType $rule &self) 
       (
         (((TTV $timestamp $stv) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal)) $action)
         (((IMPLICATION_LINK (AND_LINK ($context $action)) $goal) (TTV $timestamp $stv)) $action)
@@ -80,10 +84,10 @@
    )
 )
 
-(: getGoal (-> Atom Atom))
+;(: getGoal (-> Atom Atom))
 (= (getGoal $rule)  
   ( 
-   case (getRuleType $rule) 
+   case (getRuleType $rule &self) 
     (
       (((TTV $timestamp $stv) (IMPLICATION_LINK $andLink $goal)) $goal)
       (((IMPLICATION_LINK $andLink $goal) (TTV $timestamp $stv)) $goal)
@@ -93,10 +97,10 @@
    )
 )
 
-(: getContext (-> Atom Atom))
+;(: getContext (-> Atom Atom))
 (= (getContext $rule)
    (
-    case (getRuleType $rule) 
+    case (getRuleType $rule &self) 
       (
         (((TTV $timestamp $stv) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal)) $context)
         (((IMPLICATION_LINK (AND_LINK ($context $action)) $goal) (TTV $timestamp $stv)) $context)
@@ -108,13 +112,12 @@
 )
 
 
-(: getRuleType (-> Atom Atom))
-(= (getRuleType $id) (collapse (get-type-space &psiRules $id)))
+(= (getRuleType $id $space) (collapse (get-type-space $space $id)))
 
-(: getTV (-> Atom Atom))
+;(: getTV (-> Atom Atom))
 (= (getTV $id) 
    (
-    case (getRuleType $id)
+    case (getRuleType $id &self)
     (
       (((TTV $timestamp $stv) $link) (TTV $timestamp $stv))
       (($link (TTV $timestamp $stv)) (TTV $timestamp $stv))
@@ -147,7 +150,7 @@
 ;This function accepts an optional third argument,
 ;dgv(desiredGoalValue), if () is passed then a default value of 1.0 is used.
 ;Returns the symbol representing the added goal.
-(: addGoal (-> Atom Number Atom Atom))
+;(: addGoal (-> Atom Number Atom Atom))
 (= (addGoal $name $value $dgv)
    (if (== () $dgv) 
       (addGoalHelper $name $value 1.0) 
