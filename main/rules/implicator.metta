@@ -62,9 +62,9 @@
         )
     )
 )
-
+;;This is a helper function to assist the recursion process.
 (=(removeBasedOnPattern $pattern $space-pattern $space)
-    (unify pattern $space-pattern
+    (unify $pattern $space-pattern
     (let* (
         ($_ (remove-atom $space $space-pattern))
         ($_ (println! (hi)))
@@ -89,7 +89,7 @@
     )
 )
 
-;; checks if a rule is grounded.
+;; checks if a rule is grounded using the satisfy function.
 (= (checkSatisfiability $rule $satisfiabilityCache)
     (let* ( 
         ($query (changeRuleToQuery $rule))
@@ -121,7 +121,7 @@
 ;;         Tests for implicator    ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; !(satisfy &satisfiabilityCache (x ((TTV 1 (STV 0.5 0.6)) (IMPLICATION_LINK (AND_LINK ((x y) act)) (y)))))
-;;  !(checkSatisfiability (x ((TTV 1 (STV 0.5 0.6)) (IMPLICATION_LINK (AND_LINK ((x y) act)) (y)))) &satisfiabilityCache)
+;; !(checkSatisfiability (x ((TTV 1 (STV 0.5 0.6)) (IMPLICATION_LINK (AND_LINK ((x y) act)) (y)))) &satisfiabilityCache)
 ;; !(get-atoms &satisfiabilityCache)
-!(changeRuleToQuery (x ((TTV 1 (STV 0.5 0.6)) (IMPLICATION_LINK (AND_LINK ((x y) act)) (y)))))
+;; !(changeRuleToQuery (x ((TTV 1 (STV 0.5 0.6)) (IMPLICATION_LINK (AND_LINK ((x y) act)) (y)))))
 
