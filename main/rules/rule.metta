@@ -193,7 +193,6 @@
               ($handles (collapse (match &self (: $handle (IMPLICATION_LINK $head $goal)) $handle)))
               ($rulesList (concatTuple $handles $acc))
               ($res (filterPsiRules $tail $rulesList))
-              ;(() (println! (filter-psi-rules $rulesList $res )))
             )
         (if (== $head ())
           $acc
@@ -205,21 +204,6 @@
 
 (= (isRule $rule) (existsIn (PsiRules) $rule))
 
-(= (collectGoals $rules $acc)
-   (if (== $rules ())
-      $acc
-      (let $next (car-atom $rules) 
-        (if (== $next ()) 
-          $acc 
-          (collectGoals 
-            (cdr-atom $rules) 
-            (appendAtom (getGoal $next) $acc)
-            )
-          )
-        )
-    )
-   )
-
 ;Returns a list of all of the goals that are associated with an action, which
 ;is passed to it as arg.A goal is associated with an action whenever the goal appears in
 ;a psi-rule with that action in it.
@@ -230,9 +214,8 @@
    (let* (
           ($andLinks (collapse (match &self (AND_LINK ($context $action)) (AND_LINK ($context $action)))))
           ($rules (filterPsiRules $andLinks ()))
-          ($filtered (collectGoals $rules ()))
-          ;(() (println! (relatedGoals $rules $filtered)))
-          ($res (collapse (unique (superpose $filtered)))) ; remove duplicate goals
+          ($goals (collapse (getGoal (superpose $rules))))
+          ($res (collapse (unique (superpose $goals)))) ; remove duplicate goals
         )
         $res
       )
