@@ -4,21 +4,27 @@
 ;; !(import! &self hyperon-openpsi:main:rules:rule)
 !(bind! &satisfiabilityCache (new-space))
 
+;; This function fetches queries based on handles
+;; it returns the handle and the query as one being the type of the other.
+;; The template return type is (: handle $query)
+(= (getQueryByHandle $handle $space)
+    (match $space (: $handle $query) (: $handle $query))
+)
 
 ;; changes the rule to the query that can match to the rule
 ;; hence every rule is going to be unique since the handle for 
 ;; every rule is going to be different.
 (= (changeRuleToQuery $rule)
     (let* (
-            ($handle (car-atom $rule))
-            ($queryTTV ($handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal))))
-            ($queryTV ($handle ((STV $bel $conf) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal))))
+            ($handle (cadr-atom $rule))
+            ($queryTTV (: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal))))
+            ($queryTV (: $handle ((STV $bel $conf) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal))))
             
         )
         (unify (quote $rule) (quote $queryTTV)
-            ($handle ((TTV $time' (STV $bel' $conf')) (IMPLICATION_LINK (AND_LINK ($context' $action')) $goal')))
+            (: $handle ((TTV $time' (STV $bel' $conf')) (IMPLICATION_LINK (AND_LINK ($context' $action')) $goal')))
             (unify (quote $rule) (quote $queryTV)
-                ($handle ((STV $bel' $conf') (IMPLICATION_LINK (AND_LINK ($context' $action')) $goal')))
+                (: $handle ((STV $bel' $conf') (IMPLICATION_LINK (AND_LINK ($context' $action')) $goal')))
                 (ERROR The rule doesn't exist)
 
             )
@@ -52,7 +58,7 @@
 (= (satisfy $satisfiabilityCache $rule)
     (let* ( 
         ($query (changeRuleToQuery $rule))
-        ($handle (car-atom $rule))
+        ($handle (cadr-atom $rule))
         ($exists (checkSatisfier $rule $satisfiabilityCache))
     
     )
@@ -65,13 +71,7 @@
 ;;This is a helper function to assist the recursion process.
 (=(removeBasedOnPattern $pattern $space-pattern $space)
     (unify $pattern $space-pattern
-    (let* (
-        ($_ (remove-atom $space $space-pattern))
-        ($_ (println! (hi)))
-        
-    )
-        (empty)
-    ) 
+        (remove-atom $space $space-pattern) 
         (empty)
     )
 )
@@ -90,12 +90,13 @@
 )
 
 ;; checks if a rule is grounded using the satisfy function.
-(= (checkSatisfiability $rule $satisfiabilityCache)
+(= (checkSatisfiability $handle $satisfiabilityCache)
     (let* ( 
+        ($rule (getQueryByHandle $handle $satisfiabilityCache))
         ($query (changeRuleToQuery $rule))
         ($_ (println! (query $query)))
         ($caches (collapse (get-atoms $satisfiabilityCache)))
-        ($handle (car-atom $rule))
+        ($handle (cadr-atom $rule))
         ($_ (println! (handle $handle)))
     )
        (if (== (car-atom $query) ERROR)
