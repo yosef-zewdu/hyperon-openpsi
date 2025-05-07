@@ -219,6 +219,7 @@
 
 (: getCategories (->) Atom)
 (= (getCategories) (collapse (match &categoryIndex (: $category Category) $category)) )
+
 (= (goal-value $goal)
     (unify $goal (Goal $x $goal) $goal (ERROR the goal is incorrect format))
 )
@@ -244,11 +245,11 @@
       ($secResult (foldr min 1 $secDegree))
     
     )
-      (stv $firResult $secResult)
+      (STV $firResult $secResult)
     )
 )
 (= (isSatisfiable $rule $satisfiableChecker)
-    (== (stv 1 1)  ($satisfiableChecker $rule))
+    (== (STV 1 1)  ($satisfiableChecker $rule))
 )
 ;; (= (checkSatisfiability))
 ;; !(foldl * 1 (1 2 3 4 5))

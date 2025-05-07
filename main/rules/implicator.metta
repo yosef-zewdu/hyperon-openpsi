@@ -101,11 +101,8 @@
        (if (== (car-atom $query) ERROR)
             (FALSE_TV)
             (let* (
-                ($_ (println! (primary (collapse (get-atoms $satisfiabilityCache)))))
                 ($_ (removeBasedOnPatternList  $query $caches $satisfiabilityCache))
-                ($_ (println! (modified (collapse (get-atoms $satisfiabilityCache)))))
                 ($_ (satisfy $satisfiabilityCache $rule))
-
             )
                 (if (checkSatisfier $rule $satisfiabilityCache)
                     (TRUE_TV)
