@@ -84,11 +84,6 @@
    )
 )
 
-<<<<<<< HEAD
-;(: getGoal (-> Atom Atom))
-=======
-(: getGoal (-> Symbol Expression))
->>>>>>> fix/add_rule
 (= (getGoal $rule)  
   ( 
    case (getRuleType $rule &self) 
