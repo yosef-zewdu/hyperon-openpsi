@@ -84,6 +84,7 @@
    )
 )
 
+;(: getGoal (-> Symbol Expression))
 (= (getGoal $rule)  
   ( 
    case (getRuleType $rule &self) 
