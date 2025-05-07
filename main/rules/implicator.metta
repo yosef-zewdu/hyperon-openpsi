@@ -96,7 +96,8 @@
         (let* (
             (($head $tail) (decons-atom $patternList))
             ($_ (println! (headonRemove $head)))
-            ($_ (collapse (removeBasedOnPattern $pattern $head $space)))
+            ($_ (println! (pattern $pattern)))
+            ($_ (removeBasedOnPattern $pattern $head $space))
         )
             (removeBasedOnPatternList $pattern $tail $space)
         )
@@ -107,18 +108,19 @@
 (= (checkSatisfiability $handle $satisfiabilityCache)
     (let* ( 
         ($rule (getQueryByHandle $handle $satisfiabilityCache))
-        ($_ (println! (rule $rule)))
+        ($_ (println! (ruleSatisfiability $rule)))
         ($query (changeRuleToQuery $rule))
-        ($_ (println! (query $query)))
+        ($_ (println! (querySatisfiability $query)))
         ($caches (collapse (get-atoms $satisfiabilityCache)))
         ($handle (cadr-atom $rule))
-        ($_ (println! (handle $handle)))
+        ($_ (println! (handleSatisfiability $handle)))
     )
     
        (if (== (car-atom $query) ERROR)
             (FALSE_TV)
             (let* (
                 ($_ (removeBasedOnPatternList  $query $caches $satisfiabilityCache))
+                ($_ (println! (after-remove (collapse (get-atoms $satisfiabilityCache)))))
                 ($_ (satisfy $satisfiabilityCache $rule))
             )
                 (if (checkSatisfier $handle $satisfiabilityCache)
