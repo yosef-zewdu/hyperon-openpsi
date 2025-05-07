@@ -1,34 +1,44 @@
-;; !(register-module! ../../utilities-module)
-;; !(register-module! ../../../hyperon-openpsi)
-;; !(import! &self utilities-module:utils)
-;; !(import! &self hyperon-openpsi:main:rules:rule)
+!(register-module! ../../utilities-module)
+!(register-module! ../../../hyperon-openpsi)
+!(import! &self utilities-module:utils)
+!(import! &self hyperon-openpsi:main:rules:rule)
 !(bind! &satisfiabilityCache (new-space))
 
 ;; This function fetches queries based on handles
 ;; it returns the handle and the query as one being the type of the other.
 ;; The template return type is (: handle $query)
 (= (getQueryByHandle $handle $space)
-    (match $space (: $handle $query) (: $handle $query))
+   (let $queries (collapse (match $space (: $handle $queryBody) (: $handle $queryBody)))
+        (if (== $queries ())
+            ()
+            (car-atom $queries)
+        )
+   
+   )
 )
 
 ;; changes the rule to the query that can match to the rule
 ;; hence every rule is going to be unique since the handle for 
 ;; every rule is going to be different.
 (= (changeRuleToQuery $rule)
-    (let* (
-            ($handle (cadr-atom $rule))
-            ($queryTTV (: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal))))
-            ($queryTV (: $handle ((STV $bel $conf) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal))))
-            
-        )
-        (unify (quote $rule) (quote $queryTTV)
-            (: $handle ((TTV $time' (STV $bel' $conf')) (IMPLICATION_LINK (AND_LINK ($context' $action')) $goal')))
-            (unify (quote $rule) (quote $queryTV)
-                (: $handle ((STV $bel' $conf') (IMPLICATION_LINK (AND_LINK ($context' $action')) $goal')))
-                (ERROR The rule doesn't exist)
+    (if (== $rule ())
+        (ERROR the rule is empty)
+        (let* (
+                ($handle (cadr-atom $rule))
+                ($queryTTV (: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal))))
+                ($queryTV (: $handle ((STV $bel $conf) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal))))
+                
+            )
+            (unify (quote $rule) (quote $queryTTV)
+                (: $handle ((TTV $time' (STV $bel' $conf')) (IMPLICATION_LINK (AND_LINK ($context' $action')) $goal')))
+                (unify (quote $rule) (quote $queryTV)
+                    (: $handle ((STV $bel' $conf') (IMPLICATION_LINK (AND_LINK ($context' $action')) $goal')))
+                    (ERROR The rule doesn't exist)
 
+                )
             )
         )
+
     )
 )
 
@@ -42,11 +52,12 @@
 
 ;;checks if the rules pattern exists in the satisfiability cache
 ;;The satisfiability cache is a space to cache already grounded satisfiable code.
-(= (checkSatisfier $rule $satisfiabilityCache)
+(= (checkSatisfier $handle $satisfiabilityCache)
     (let* (
+        ($rule (getQueryByHandle $handle $satisfiabilityCache))
         ($caches (collapse (get-atoms $satisfiabilityCache)))
         ($_ (println! (caches $caches)))
-        ($truthValues (collapse (checkSatisfier' $rule (superpose $caches))))
+        ($truthValues (if (> (size-atom $caches) 0)(collapse (checkSatisfier' $rule (superpose $caches))) (False)))
         (() (println! (truthValues $truthValues)))
     ) 
         (any $truthValues)
@@ -57,9 +68,12 @@
 ;;Implements a simple grounding mechanism for metta
 (= (satisfy $satisfiabilityCache $rule)
     (let* ( 
+        ($_ (println! (rules in satisfy $rule)))
         ($query (changeRuleToQuery $rule))
+        ($_ (println! (queryToSatisfy $query)))
         ($handle (cadr-atom $rule))
-        ($exists (checkSatisfier $rule $satisfiabilityCache))
+        ($_ (println! (handle $handle)))
+        ($exists (checkSatisfier $handle $satisfiabilityCache))
     
     )
         (if $exists
@@ -72,7 +86,7 @@
 (=(removeBasedOnPattern $pattern $space-pattern $space)
     (unify $pattern $space-pattern
         (remove-atom $space $space-pattern) 
-        (empty)
+        ()
     )
 )
 
@@ -93,19 +107,21 @@
 (= (checkSatisfiability $handle $satisfiabilityCache)
     (let* ( 
         ($rule (getQueryByHandle $handle $satisfiabilityCache))
+        ($_ (println! (rule $rule)))
         ($query (changeRuleToQuery $rule))
         ($_ (println! (query $query)))
         ($caches (collapse (get-atoms $satisfiabilityCache)))
         ($handle (cadr-atom $rule))
         ($_ (println! (handle $handle)))
     )
+    
        (if (== (car-atom $query) ERROR)
             (FALSE_TV)
             (let* (
                 ($_ (removeBasedOnPatternList  $query $caches $satisfiabilityCache))
                 ($_ (satisfy $satisfiabilityCache $rule))
             )
-                (if (checkSatisfier $rule $satisfiabilityCache)
+                (if (checkSatisfier $handle $satisfiabilityCache)
                     (TRUE_TV)
                     (FALSE_TV)
                 )
@@ -118,8 +134,12 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;         Tests for implicator    ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; !(satisfy &satisfiabilityCache (x ((TTV 1 (STV 0.5 0.6)) (IMPLICATION_LINK (AND_LINK ((x y) act)) (y)))))
-;; !(checkSatisfiability (x ((TTV 1 (STV 0.5 0.6)) (IMPLICATION_LINK (AND_LINK ((x y) act)) (y)))) &satisfiabilityCache)
+!(satisfy &satisfiabilityCache (: x ((TTV 1 (STV 0.5 0.6)) (IMPLICATION_LINK (AND_LINK ((x y) act)) (y)))))
+!(get-atoms &satisfiabilityCache)
+!(getQueryByHandle x &satisfiabilityCache)
+!(checkSatisfiability x &satisfiabilityCache)
+;; !(changeRuleToQuery ())
 ;; !(get-atoms &satisfiabilityCache)
-;; !(changeRuleToQuery (x ((TTV 1 (STV 0.5 0.6)) (IMPLICATION_LINK (AND_LINK ((x y) act)) (y)))))
+
+;; !(changeRuleToQuery (: x ((TTV 1 (STV 0.5 0.6)) (IMPLICATION_LINK (AND_LINK ((x y) act)) (y)))))
 
