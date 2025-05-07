@@ -219,8 +219,10 @@
 
 (: getCategories (->) Atom)
 (= (getCategories) (collapse (match &categoryIndex (: $category Category) $category)) )
+
+(: goal-value (-> Symbol Number))
 (= (goal-value $goal)
-    (unify $goal (Goal $x $goal) $goal (ERROR the goal is incorrect format))
+    (let (Goal $value $dgv) (get-type $goal) $value)
 )
 
 
