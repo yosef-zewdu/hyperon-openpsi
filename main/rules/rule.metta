@@ -186,12 +186,11 @@
    (if (== $andLinks ())
       $acc
       (let* (
-              ($head (car-atom $andLinks))
-              ($tail (cdr-atom $andLinks))
-              ($handles (collapse (match &psiRules (: $handle (IMPLICATION_LINK $head $goal)) $handle)))
+              (($head $tail) (decons-atom $andLinks))
+              ($handles (collapse (match &self (: $handle (IMPLICATION_LINK $head $goal)) $handle)))
               ($rulesList (concatTuple $handles $acc))
               ($res (filterPsiRules $tail $rulesList))
-              ;(() (println! (filter-psi-rules $rules $res)))
+              ;(() (println! (filter-psi-rules $rulesList $res )))
             )
         (if (== $head ())
           $acc
