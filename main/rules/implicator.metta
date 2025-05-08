@@ -22,7 +22,7 @@
 ;; every rule is going to be different.
 (= (changeRuleToQuery $rule)
     (if (== $rule ())
-        (ERROR the rule is empty)
+        ()
         (let* (
                 ($handle (cadr-atom $rule))
                 ($queryTTV (: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal))))
@@ -33,7 +33,7 @@
                 (: $handle ((TTV $time' (STV $bel' $conf')) (IMPLICATION_LINK (AND_LINK ($context' $action')) $goal')))
                 (unify (quote $rule) (quote $queryTV)
                     (: $handle ((STV $bel' $conf') (IMPLICATION_LINK (AND_LINK ($context' $action')) $goal')))
-                    (ERROR The rule doesn't exist)
+                    ()
 
                 )
             )
@@ -85,11 +85,12 @@
 ;;This is a helper function to assist the recursion process.
 (=(removeBasedOnPattern $pattern $space-pattern $space)
     (unify $pattern $space-pattern
-        (remove-atom $space $space-pattern) 
-        ()
+        (let $_ (remove-atom $space $space-pattern) (pass) )
+        (fail)
     )
 )
-
+;; Removes a pattern based on a list of patterns stored in a space.
+;; This function expects a signal from removeBasedOnPattern every step.
 (=(removeBasedOnPatternList $pattern $patternList $space)
     (if (== () $patternList)
         ()
@@ -97,9 +98,13 @@
             (($head $tail) (decons-atom $patternList))
             ($_ (println! (headonRemove $head)))
             ($_ (println! (pattern $pattern)))
-            ($_ (removeBasedOnPattern $pattern $head $space))
+            ($state (removeBasedOnPattern $pattern $head $space))
         )
-            (removeBasedOnPatternList $pattern $tail $space)
+            (if (== $state (pass))
+                ()
+                (removeBasedOnPatternList $pattern $tail $space)
+
+            )
         )
     )
 )
@@ -113,7 +118,7 @@
         ($_ (println! (handleSatisfiability $handle)))
     )
     
-       (if (or (== $query ()) (== (car-atom $query) ERROR))
+       (if  (== $query ()) ;(== (car-atom $query) ERROR))
             (FALSE_TV)
             (let* (
                 ($_ (removeBasedOnPatternList  $query $caches $satisfiabilityCache))
@@ -133,10 +138,10 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;         Tests for implicator    ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-!(satisfy &satisfiabilityCache (: x ((TTV 1 (STV 0.5 0.6)) (IMPLICATION_LINK (AND_LINK ((x y) act)) (y)))))
-!(get-atoms &satisfiabilityCache)
-!(getQueryByHandle x &satisfiabilityCache)
-!(checkSatisfiability x &satisfiabilityCache)
+;; !(satisfy &satisfiabilityCache (: x ((TTV 1 (STV 0.5 0.6)) (IMPLICATION_LINK (AND_LINK ((x y) act)) (y)))))
+;; !(get-atoms &satisfiabilityCache)
+;; !(getQueryByHandle x &satisfiabilityCache)
+;; !(checkSatisfiability x &satisfiabilityCache)
 ;; !(changeRuleToQuery ())
 ;; !(get-atoms &satisfiabilityCache)
 
