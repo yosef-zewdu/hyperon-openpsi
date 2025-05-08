@@ -47,6 +47,9 @@
 !(assertEqual (get-type run) (Goal 0.5 0.1))
 
 
+!(assertEqual (relatedGoals y) (z))
+
+
 ;Category tests
 !(assertEqual (addCategory testI) testI)
 
