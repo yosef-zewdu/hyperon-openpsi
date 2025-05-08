@@ -1,7 +1,7 @@
-!(register-module! ../../utilities-module)
-!(register-module! ../../../hyperon-openpsi)
-!(import! &self utilities-module:utils)
-!(import! &self hyperon-openpsi:main:rules:rule)
+;; !(register-module! ../../utilities-module)
+;; !(register-module! ../../../hyperon-openpsi)
+;; !(import! &self utilities-module:utils)
+;; !(import! &self hyperon-openpsi:main:rules:rule)
 !(bind! &satisfiabilityCache (new-space))
 
 ;; This function fetches queries based on handles
@@ -107,21 +107,18 @@
 ;; checks if a rule is grounded using the satisfy function.
 (= (checkSatisfiability $handle $satisfiabilityCache)
     (let* ( 
-        ($rule (getQueryByHandle $handle $satisfiabilityCache))
-        ($_ (println! (ruleSatisfiability $rule)))
-        ($query (changeRuleToQuery $rule))
+        ($query (getQueryByHandle $handle $satisfiabilityCache))
         ($_ (println! (querySatisfiability $query)))
         ($caches (collapse (get-atoms $satisfiabilityCache)))
-        ($handle (cadr-atom $rule))
         ($_ (println! (handleSatisfiability $handle)))
     )
     
-       (if (== (car-atom $query) ERROR)
+       (if (or (== $query ()) (== (car-atom $query) ERROR))
             (FALSE_TV)
             (let* (
                 ($_ (removeBasedOnPatternList  $query $caches $satisfiabilityCache))
                 ($_ (println! (after-remove (collapse (get-atoms $satisfiabilityCache)))))
-                ($_ (satisfy $satisfiabilityCache $rule))
+                ($_ (satisfy $satisfiabilityCache $query))
             )
                 (if (checkSatisfier $handle $satisfiabilityCache)
                     (TRUE_TV)
