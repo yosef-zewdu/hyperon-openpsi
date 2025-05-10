@@ -268,3 +268,41 @@
 (: getCategories (->) Expression)
 (= (getCategories) (collapse (match &categoryIndex (: $category Category) $category)) )
 
+
+
+(: goal-value (-> Symbol Number))
+(= (goal-value $goal)
+    (let (Goal $value $dgv) (get-type $goal) $value)
+)
+
+
+
+(= (cogTvMean ($tv $val $conf))
+    (/ (+ $val $conf) 2)
+)
+
+(= (cogTvConfidence ($tv $val $conf))
+  $conf
+)
+
+(= (min $head $tail) (if (< $head $tail) $head $tail))
+
+
+(= (contextStv $stvList)
+    (let* (
+      ($firDegree (collapse (cogTvMean (superpose $stvList))))
+      ($secDegree (collapse (cogTvConfidence (superpose $stvList))))
+      ($firResult (foldr * 1 $firDegree))
+      ($secResult (foldr min 1 $secDegree))
+    
+    )
+      (STV $firResult $secResult)
+    )
+)
+(= (isSatisfiable $rule $satisfiableChecker)
+    (== (STV 1 1)  ($satisfiableChecker $rule))
+)
+;; (= (checkSatisfiability))
+;; !(foldl * 1 (1 2 3 4 5))
+;; !(foldl min 1 (1 2 3 4 5))
+;; !(contextStv ((stv 0.5 0.4) (stv 0.6 0.8)))
