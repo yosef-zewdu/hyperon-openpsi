@@ -30,6 +30,18 @@
 (= (selectSingleActionHelper $rulesWithWeight $minValue $currAction $targetValue)
     (if (== $rulesWithWeight ())
         $currAction
+        (let* (
+            ($currRule (car-atom $rulesWithWeight))
+            ($tail (cdr-atom $rulesWithWeight))
+            ($weight (getWeightFromRule $currRule))
+            ($ruleAction (selectActionFromRule $rule))
+            ($range (- $targetValue $weight))
+        )
+            (if (< $range $minValue)
+                (selectSingleActionHelper $tail $weight $ruleAction $targetValue)
+                (selectSingleActionHelper $tail $minValue $currAction $targetValue)
+            )
+        )
 
     )
     
