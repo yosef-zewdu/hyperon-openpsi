@@ -37,7 +37,7 @@
             ($ruleAction (selectActionFromRule $rule))
             ($range (- $targetValue $weight))
         )
-            (if (< $range $minValue)
+            (if (< $range (- $targetValue $minValue))
                 (selectSingleActionHelper $tail $weight $ruleAction $targetValue)
                 (selectSingleActionHelper $tail $minValue $currAction $targetValue)
             )
@@ -46,6 +46,7 @@
     )
     
 )
+
 (= (planner $actionSpace $initState $goal $accum)
     (if (== $initState $goal)
         $accum ;; contains all the actions in the action selection criterion
