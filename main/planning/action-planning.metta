@@ -47,6 +47,21 @@
     
 )
 
+;; This functions selects a single action from a list of rules
+;; That are going to be implemented in relation to a target value.
+(= (selectSingleAction $rulesWithWeight $targetValue)
+    (if (== $rulesWithWeight ())
+        ()
+        (let* (
+            ($head (car-atom $rulesWithWeight))
+            ($action (selectActionFromRule $head))
+            ($weight (getWeightFromRule))
+        )
+            (selectSingleActionHelper $rulesWithWeight $weight $action $targetValue)
+        )
+    )
+)
+
 (= (planner $actionSpace $initState $goal $accum)
     (if (== $initState $goal)
         $accum ;; contains all the actions in the action selection criterion
