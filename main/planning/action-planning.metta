@@ -9,6 +9,7 @@
 ;; 5. Hence, the agent selects the rule with the best metric.
 ;; 6. Then it selects the action from the rule and adds it to an accumulator.
 ;; 7. Then it starts from the goal as a context from the rule that is selected.
+!(bind! &ruleSpace (new-space))
 (= (weightRule $rule)
     (random-float 0 1)
 )
@@ -29,7 +30,7 @@
 ;; select single action from available rules. 
 (= (selectSingleActionHelper $rulesWithWeight $minValue $currAction $targetValue)
     (if (== $rulesWithWeight ())
-        $currAction
+        ($rulesWithWeight $currAction)
         (let* (
             ($currRule (car-atom $rulesWithWeight))
             ($tail (cdr-atom $rulesWithWeight))
@@ -62,9 +63,17 @@
     )
 )
 
-(= (planner $actionSpace $initState $goal $accum)
+;; This function might require further modification later.
+(= (findRulesWithContext $space $context)
+    (collapse (match $space (: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal)))))
+)
+
+(= (planner $ruleSpace $initState $goal $accum)
     (if (== $initState $goal)
         $accum ;; contains all the actions in the action selection criterion
+
+
+
         
     )
 )
