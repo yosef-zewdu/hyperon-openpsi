@@ -38,14 +38,6 @@
                 (IMPLICATION_LINK 
                 (AND_LINK ((Goal init 0.8 0.5) idle)) 
                 (Goal low_energy 1.0 1.0)))) 4)
-
-
-
-            
-
-            
-
-
             
             )
         )
@@ -54,7 +46,7 @@
 )
 
 (= (getWeightFromRule $rule)
-    (let ($schema $weight) $weight)
+    (let ($schema $weight) $rule $weight)
 )
 ;; The below function extracts an action from a cognitive schema.
 ;; The input will be a scalar weighted rule and returns an action. 
@@ -159,3 +151,11 @@
 ;;              Tests for action Planner                    ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
  
+!(getWeightFromRule ((: r1 ((TTV 1 (STV 0.8 0.7)) 
+                    (IMPLICATION_LINK 
+                    (AND_LINK ((Goal init 0.9 0.6) explore)) 
+                    (Goal found_target 1.0 1.0)))) 2))
+!(getWeightFromRule ((: r2 ((TTV 1 (STV 0.8 0.7)) 
+                    (IMPLICATION_LINK 
+                    (AND_LINK ((Goal init 0.9 0.6) explore)) 
+                    (Goal found_target 1.0 1.0)))) 3))
