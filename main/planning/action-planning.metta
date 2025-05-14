@@ -14,6 +14,45 @@
     (random-float 0 1)
 )
 
+(= (addRulesToSpace $space)
+    (add-reduct $space (superpose (
+            ;;  ((: x ((TTV 1 (STV 0.7 0.6)) (IMPLICATION_LINK (AND_LINK ((Goal init 0.9 0.6) act1)) (Goal g 1.0 1.0)))) 3)
+            ;;  ((: y ((TTV 1 (STV 0.6 0.5)) (IMPLICATION_LINK (AND_LINK ((Goal g 0.9 0.6) act1)) (Goal g1 1.0 1.0)))) 4)
+             ((: r1 ((TTV 1 (STV 0.8 0.7)) 
+                    (IMPLICATION_LINK 
+                    (AND_LINK ((Goal init 0.9 0.6) explore)) 
+                    (Goal found_target 1.0 1.0)))) 2)
+            ((: r2 ((TTV 1 (STV 0.75 0.65)) 
+                (IMPLICATION_LINK 
+                (AND_LINK ((Goal found_target 0.95 0.7) approach)) 
+                (Goal near_target 1.0 1.0)))) 3)
+            ((: r3 ((TTV 1 (STV 0.7 0.6)) 
+                (IMPLICATION_LINK 
+                (AND_LINK ((Goal near_target 0.9 0.7) interact)) 
+                (Goal task_done 1.0 1.0)))) 2)
+            ((: r4 ((TTV 1 (STV 0.65 0.6)) 
+                (IMPLICATION_LINK 
+                (AND_LINK ((Goal task_done 0.9 0.8) report)) 
+                (Goal mission_complete 1.0 1.0)))) 1)
+            ((: r5 ((TTV 1 (STV 0.5 0.5)) 
+                (IMPLICATION_LINK 
+                (AND_LINK ((Goal init 0.8 0.5) idle)) 
+                (Goal low_energy 1.0 1.0)))) 4)
+
+
+
+            
+
+            
+
+
+            
+            )
+        )
+    )
+
+)
+
 (= (getWeightFromRule $rule)
     (let ($schema $weight) $weight)
 )
