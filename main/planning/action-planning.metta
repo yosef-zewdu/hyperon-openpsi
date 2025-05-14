@@ -56,7 +56,7 @@
         (let* (
             ($head (car-atom $rulesWithWeight))
             ($action (selectActionFromRule $head))
-            ($weight (getWeightFromRule))
+            ($weight (getWeightFromRule $head))
         )
             (selectSingleActionHelper $rulesWithWeight $weight $action $targetValue)
         )
@@ -65,16 +65,58 @@
 
 ;; This function might require further modification later.
 (= (findRulesWithContext $space $context)
-    (collapse (match $space (: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal)))))
+    (collapse (match $space ((: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal))) $weight)
+        ((: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal))) $weight) 
+    ))
+
+)
+
+(= (getDgv $goal)
+    (let (Goal $name $x $y) $goal $y)
+)
+
+( = (extractGoalName $goal)
+    (let (Goal $name $x $y) $goal $name)
+)
+
+(= (extractContextFromRule $rule)
+    (let ((: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal))) $weight) $rule $context)
 )
 
 (= (planner $ruleSpace $initState $goal $accum)
     (if (== $initState $goal)
         $accum ;; contains all the actions in the action selection criterion
+        (let* (
+            ($target (getDgv $goal))
+            ($goalName (extractGoalName $goal))
+            ($relatedRules (findRulesWithContext $ruleSpace $initState))
+            (($currRule $action)
+                (if (== $relatedRules ())
+                    (() ())
+                    (selectSingleAction $relatedRules $target)
+                )
+            )
+            
+        )
+            (if (== $action ())
+                $accum
+                (let* (
+                    ($newAccum (union-atom $accum ($action))) ;; accumulating actions in the action accumulator.
+                    ($newState (extractContextFromRule $currRule))         
+                )
+                    (planner $ruleSpace $newState $goal $newAccum)
+                )
+            )
+
+        )
+        
 
 
 
         
     )
 )
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;              Tests for action Planner                    ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
  
