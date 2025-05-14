@@ -33,11 +33,11 @@
             ((: r4 ((TTV 1 (STV 0.65 0.6)) 
                 (IMPLICATION_LINK 
                 (AND_LINK ((Goal task_done 0.9 0.8) report)) 
-                (Goal mission_complete 1.0 1.0)))) 1)
+                (Goal mission_complete 1.0 1.0)))) 10)
             ((: r5 ((TTV 1 (STV 0.5 0.5)) 
                 (IMPLICATION_LINK 
                 (AND_LINK ((Goal init 0.8 0.5) idle)) 
-                (Goal low_energy 1.0 1.0)))) 4)
+                (Goal low_energy 1.0 1.0)))) 1)
             
             )
         )
@@ -61,12 +61,15 @@
 ;; select single action from available rules. 
 (= (selectSingleActionHelper $rulesWithWeight $minValue $currAction $targetValue)
     (if (== $rulesWithWeight ())
-        ($rulesWithWeight $currAction)
+        (let $handleWithAction (findRulesWithAction &ruleSpace $currAction) ;; a temporary solution
+            ($handleWithAction $currAction)
+
+        )
         (let* (
             ($currRule (car-atom $rulesWithWeight))
             ($tail (cdr-atom $rulesWithWeight))
             ($weight (getWeightFromRule $currRule))
-            ($ruleAction (selectActionFromRule $rule))
+            ($ruleAction (selectActionFromRule $currRule))
             ($range (- $targetValue $weight))
         )
             (if (< $range (- $targetValue $minValue))
@@ -102,6 +105,13 @@
 
 )
 
+(= (findRulesWithAction $space $action)
+    (collapse (match $space ((: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal))) $weight)
+        ((: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal))) $weight)
+        
+    ))
+
+)
 (= (getDgv $goal)
     (let (Goal $name $x $y) $goal $y)
 )
@@ -159,3 +169,15 @@
                     (IMPLICATION_LINK 
                     (AND_LINK ((Goal init 0.9 0.6) explore)) 
                     (Goal found_target 1.0 1.0)))) 3))
+
+!(addRulesToSpace &ruleSpace)
+!(selectActionFromRule ((: r1 ((TTV 1 (STV 0.8 0.7)) 
+                    (IMPLICATION_LINK 
+                    (AND_LINK ((Goal init 0.9 0.6) explore)) 
+                    (Goal found_target 1.0 1.0)))) 2))
+!(extractContextFromRule ((: r1 ((TTV 1 (STV 0.8 0.7)) 
+                    (IMPLICATION_LINK 
+                    (AND_LINK ((Goal init 0.9 0.6) explore)) 
+                    (Goal found_target 1.0 1.0)))) 2))
+!(getDgv (Goal first 1.0 0.3))
+!(selectSingleAction (collapse (get-atoms &ruleSpace)) 10.0)
