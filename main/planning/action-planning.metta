@@ -62,7 +62,7 @@
 (= (selectSingleActionHelper $rulesWithWeight $minValue $currAction $targetValue)
     (if (== $rulesWithWeight ())
         (let $handleWithAction (findRulesWithAction &ruleSpace $currAction) ;; a temporary solution
-            ($handleWithAction $currAction)
+            ((car-atom $handleWithAction) $currAction)
 
         )
         (let* (
@@ -116,14 +116,20 @@
     (let (Goal $name $x $y) $goal $y)
 )
 
-( = (extractGoalName $goal)
+(= (extractGoalName $goal)
     (let (Goal $name $x $y) $goal $name)
+)
+
+(= (extractGoalFromRule $rule)
+    (let ((: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal))) $weight) $rule $goal)
+
 )
 
 (= (extractContextFromRule $rule)
     (let ((: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal))) $weight) $rule $context)
 )
-
+;; an implementation inspired that greedily selects 
+;; an action at each step.
 (= (planner $ruleSpace $initState $goal $accum)
     (if (== $initState $goal)
         $accum ;; contains all the actions in the action selection criterion
@@ -131,6 +137,10 @@
             ($target (getDgv $goal))
             ($goalName (extractGoalName $goal))
             ($relatedRules (findRulesWithContext $ruleSpace $initState))
+            ($_ (println! (currentState $initState)))
+            ($_ (println! (related Rules $relatedRules)))
+            ($_ (println! (goal name $goalName)))
+            ($_ (println! (accumulator $accum)))
             (($currRule $action)
                 (if (== $relatedRules ())
                     (() ())
@@ -143,7 +153,7 @@
                 $accum
                 (let* (
                     ($newAccum (union-atom $accum ($action))) ;; accumulating actions in the action accumulator.
-                    ($newState (extractContextFromRule $currRule))         
+                    ($newState (extractGoalFromRule $currRule))         
                 )
                     (planner $ruleSpace $newState $goal $newAccum)
                 )
@@ -181,3 +191,4 @@
                     (Goal found_target 1.0 1.0)))) 2))
 !(getDgv (Goal first 1.0 0.3))
 !(selectSingleAction (collapse (get-atoms &ruleSpace)) 10.0)
+!(planner &ruleSpace (Goal init 0.9 0.6) (Goal mission_complete 1.0 1.0) ())
