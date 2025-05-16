@@ -85,8 +85,8 @@
 ;; This functions selects a single action from a list of rules
 ;; That are going to be implemented in relation to a target value.
 (= (selectSingleAction $rulesWithWeight $targetValue)
-    (if (== $rulesWithWeight ())
-        ()
+    (if (or (== $rulesWithWeight ()) (== $rulesWithWeight (())))
+        (() ())
         (let* (
             ($head (car-atom $rulesWithWeight))
             ($action (selectActionFromRule $head))
@@ -101,6 +101,12 @@
 (= (findRulesWithContext $space $context)
     (collapse (match $space ((: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal))) $weight)
         ((: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal))) $weight) 
+    ))
+
+)
+(= (findRulesWithGoalAsContext $space $goal)
+    (collapse (match $space ((: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ($goal $action)) $nextGoal))) $weight)
+        ((: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ($goal $action)) $nextGoal))) $weight) 
     ))
 
 )
@@ -137,21 +143,26 @@
             ($target (getDgv $goal))
             ($goalName (extractGoalName $goal))
             ($relatedRules (findRulesWithContext $ruleSpace $initState))
+            ($goals (collapse (extractGoalFromRule (superpose $relatedRules))))
+            ($_ (println! (goals $goals)))
+            ($nextRules (collapse (findRulesWithGoalAsContext $ruleSpace (superpose $goals))))
             ($_ (println! (currentState $initState)))
-            ($_ (println! (related Rules $relatedRules)))
+            ($_ (println! (next Rules $nextRules)))
             ($_ (println! (goal name $goalName)))
             ($_ (println! (accumulator $accum)))
-            (($currRule $action)
-                (if (== $relatedRules ())
-                    (() ())
-                    (selectSingleAction $relatedRules $target)
-                )
-            )
+            ($_ (println! (target $target)))
+            (($currRule $action) (selectSingleAction $nextRules $target))
+            ($_ (println! (currRule $currRule action $action)))
             
         )
             (if (== $action ())
-                $accum
                 (let* (
+                    ($_ (println! (No more action found)))
+                )
+                    $accum
+                )
+                (let* (
+                    ($_ (println! (non-empty action)))
                     ($newAccum (union-atom $accum ($action))) ;; accumulating actions in the action accumulator.
                     ($newState (extractGoalFromRule $currRule))         
                 )
@@ -191,4 +202,6 @@
                     (Goal found_target 1.0 1.0)))) 2))
 !(getDgv (Goal first 1.0 0.3))
 !(selectSingleAction (collapse (get-atoms &ruleSpace)) 10.0)
-!(planner &ruleSpace (Goal init 0.9 0.6) (Goal mission_complete 1.0 1.0) ())
+!(findRulesWithGoalAsContext &ruleSpace (Goal low_energy 1 1))
+!(planner &ruleSpace (Goal found_target 0.95 0.7) (Goal mission_complete 1.0 1.0) ())
+;; !(selectSingleAction (()) 1.0)
