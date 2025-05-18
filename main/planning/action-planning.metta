@@ -18,27 +18,74 @@
     (add-reduct $space (superpose (
             ;;  ((: x ((TTV 1 (STV 0.7 0.6)) (IMPLICATION_LINK (AND_LINK ((Goal init 0.9 0.6) act1)) (Goal g 1.0 1.0)))) 3)
             ;;  ((: y ((TTV 1 (STV 0.6 0.5)) (IMPLICATION_LINK (AND_LINK ((Goal g 0.9 0.6) act1)) (Goal g1 1.0 1.0)))) 4)
-             ((: r1 ((TTV 1 (STV 0.8 0.7)) 
-                    (IMPLICATION_LINK 
-                    (AND_LINK ((Goal init 0.9 0.6) explore)) 
-                    (Goal found_target 1.0 1.0)))) 2)
-            ((: r2 ((TTV 1 (STV 0.75 0.65)) 
-                (IMPLICATION_LINK 
-                (AND_LINK ((Goal found_target 0.95 0.7) approach)) 
-                (Goal near_target 1.0 1.0)))) 3)
-            ((: r3 ((TTV 1 (STV 0.7 0.6)) 
-                (IMPLICATION_LINK 
-                (AND_LINK ((Goal near_target 0.9 0.7) interact)) 
-                (Goal task_done 1.0 1.0)))) 2)
-            ((: r4 ((TTV 1 (STV 0.65 0.6)) 
-                (IMPLICATION_LINK 
-                (AND_LINK ((Goal task_done 0.9 0.8) report)) 
-                (Goal mission_complete 1.0 1.0)))) 10)
-            ((: r5 ((TTV 1 (STV 0.5 0.5)) 
-                (IMPLICATION_LINK 
-                (AND_LINK ((Goal init 0.8 0.5) idle)) 
-                (Goal low_energy 1.0 1.0)))) 1)
-            
+            ;;  ((: r1 ((TTV 1 (STV 0.8 0.7)) 
+            ;;         (IMPLICATION_LINK 
+            ;;         (AND_LINK ((Goal init 0.9 0.6) explore)) 
+            ;;         (Goal found_target 1.0 1.0)))) 2)
+            ;; ((: r2 ((TTV 1 (STV 0.75 0.65)) 
+            ;;     (IMPLICATION_LINK 
+            ;;     (AND_LINK ((Goal found_target 0.95 0.7) approach)) 
+            ;;     (Goal near_target 1.0 1.0)))) 3)
+            ;; ((: r3 ((TTV 1 (STV 0.7 0.6)) 
+            ;;     (IMPLICATION_LINK 
+            ;;     (AND_LINK ((Goal near_target 0.9 0.7) interact)) 
+            ;;     (Goal task_done 1.0 1.0)))) 2)
+            ;; ((: r4 ((TTV 1 (STV 0.65 0.6)) 
+            ;;     (IMPLICATION_LINK 
+            ;;     (AND_LINK ((Goal task_done 0.9 0.8) report)) 
+            ;;     (Goal mission_complete 1.0 1.0)))) 10)
+            ;; ((: r5 ((TTV 1 (STV 0.5 0.5)) 
+            ;;     (IMPLICATION_LINK 
+            ;;     (AND_LINK ((Goal init 0.8 0.5) idle)) 
+            ;;     (Goal low_energy 1.0 1.0)))) 1)
+                ;; r1: Start exploring
+((: r1 ((TTV 1 (STV 0.8 0.7)) 
+        (IMPLICATION_LINK 
+          (AND_LINK ((Goal init 0.9 0.6) explore)) 
+          (Goal found_target 1.0 1.0)))) 2)
+
+;; r2: Approach after finding target
+((: r2 ((TTV 1 (STV 0.75 0.65)) 
+        (IMPLICATION_LINK 
+          (AND_LINK ((Goal found_target 1.0 1.0) approach)) 
+          (Goal near_target 1.0 1.0)))) 3)
+
+;; r3: Interact when near
+((: r3 ((TTV 1 (STV 0.7 0.6)) 
+        (IMPLICATION_LINK 
+          (AND_LINK ((Goal near_target 1.0 1.0) interact)) 
+          (Goal task_done 1.0 1.0)))) 2)
+
+;; r4: Report task done
+((: r4 ((TTV 1 (STV 0.65 0.6)) 
+        (IMPLICATION_LINK 
+          (AND_LINK ((Goal task_done 1.0 1.0) report)) 
+          (Goal mission_complete 1.0 1.0)))) 10)
+
+;; r5: Do nothing and become low energy
+((: r5 ((TTV 1 (STV 0.5 0.5)) 
+        (IMPLICATION_LINK 
+          (AND_LINK ((Goal init 0.8 0.5) idle)) 
+          (Goal low_energy 1.0 1.0)))) 1)
+
+;; r6: Analyze after mission complete
+((: r6 ((TTV 1 (STV 0.75 0.7)) 
+        (IMPLICATION_LINK 
+          (AND_LINK ((Goal mission_complete 0.9 0.7) analyze)) 
+          (Goal analyze_data 1.0 1.0)))) 4)
+
+;; r7: Upload results after analysis
+((: r7 ((TTV 1 (STV 0.7 0.7)) 
+        (IMPLICATION_LINK 
+          (AND_LINK ((Goal analyze_data 0.85 0.7) upload)) 
+          (Goal upload_results 1.0 1.0)))) 2)
+
+;; r8: Reboot after upload
+((: r8 ((TTV 1 (STV 0.9 0.8)) 
+        (IMPLICATION_LINK 
+          (AND_LINK ((Goal upload_results 0.95 0.75) reboot)) 
+          (Goal reset_system 1.0 1.0)))) 1)
+
             )
         )
     )
@@ -118,6 +165,20 @@
     ))
 
 )
+;; This function fetches rules for multiple goals given as an s-expression. 
+(= (findRulesForMultipleGoals $space $goals $accum)
+    (if (== $goals ())
+        $accum
+        (let* (
+            (($head $tail) (decons-atom $goals))
+            ($rules (findRulesWithGoalAsContext $space $goal))
+            ($newAccum (union-atom $accum $rules))
+        )  
+            (findRulesForMultipleGoals $space $tail $newAccum)
+        )
+    )
+)
+
 (= (getDgv $goal)
     (let (Goal $name $x $y) $goal $y)
 )
@@ -145,7 +206,7 @@
             ($relatedRules (findRulesWithContext $ruleSpace $initState))
             ($goals (collapse (extractGoalFromRule (superpose $relatedRules))))
             ($_ (println! (goals $goals)))
-            ($nextRules (collapse (findRulesWithGoalAsContext $ruleSpace (superpose $goals))))
+            ($nextRules (findRulesForMultipleGoals $ruleSpace $goals ()))
             ($_ (println! (currentState $initState)))
             ($_ (println! (next Rules $nextRules)))
             ($_ (println! (goal name $goalName)))
@@ -203,5 +264,5 @@
 !(getDgv (Goal first 1.0 0.3))
 !(selectSingleAction (collapse (get-atoms &ruleSpace)) 10.0)
 !(findRulesWithGoalAsContext &ruleSpace (Goal low_energy 1 1))
-!(planner &ruleSpace (Goal found_target 0.95 0.7) (Goal mission_complete 1.0 1.0) ())
+!(planner &ruleSpace (Goal init 0.9 0.6) (Goal reset_system 1.0 1.0) ())
 ;; !(selectSingleAction (()) 1.0)
