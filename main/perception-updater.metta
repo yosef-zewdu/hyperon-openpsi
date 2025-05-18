@@ -40,16 +40,16 @@
         (let* (
             (($head $tail) (decons-atom $expressions))
             ((perception $timeCycle $observation) $head)
-            ($isHeadSmaller (< $timeCycle $min))
+            ($isHeadLarger (> $timeCycle $min))
         )
-            (if $isHeadSmaller (fetchMaxCycle' $tail $timeCycle) (fetchMaxCycle' $tail $min))
+            (if $isHeadLarger (fetchMaxCycle' $tail $timeCycle) (fetchMaxCycle' $tail $min))
         )
     )
 
 )
 (= (fetchMaxCycle $space)
     (let $expressions (collapse (get-atoms $space))
-        (fetchMaxCycle' $expressions -1) ;; the -1 here is below the lower bound for timecycles. Since
+        (fetchMaxCycle' $expressions 0) ;; the -1 here is below the lower bound for timecycles. Since
                                         ;; they are positive values.
     )
 )
@@ -81,6 +81,13 @@
 
 
 )
-!(superpose (a b c d))
-!(changeToPercepta (a b c d) 4)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;          tests for perception-updater ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+!(add-atom &envSpace (a b c d))
+!(add-atom &envSpace (dat))
+!(get-atoms &envSpace)
+!(remove-atoms &envSpace)
+!(get-atoms &envSpace)
+!(fetchMaxCycle &percepta)
 
