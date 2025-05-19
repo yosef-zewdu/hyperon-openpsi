@@ -27,4 +27,4 @@
 !(assertEqual (getGoal r3) finalGoal)
 
 !(addGoal finalGoal 0.9 1 &self)
-!(hill_climbing_planner g1 finalGoal (TestedActions) () &self)
+!(hillClimbingPlanner g1 finalGoal (TestedActions) () &self)
