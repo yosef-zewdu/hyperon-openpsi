@@ -32,7 +32,7 @@
 
 (= (TestedActions) &testedActions)
 
-(= (hill_climbing_planner $initialState $goal $testedActions $plan $ruleSpace)
+(= (hillClimbingPlanner $initialState $goal $testedActions $plan $ruleSpace)
    (if (== $initialState $goal) ;if the current state is the goal, return the plan.
      $plan
      (let* (
@@ -55,7 +55,7 @@
               )
            (if (>= $currentDistance $minDistance)
             (let () (update-atom $testedActions ($initialState $bestAction) ($bestState $bestAction)) 
-              (hill_climbing_planner $bestState $goal $testedActions (cons-atom $bestAction $plan) $ruleSpace) ;recursively explore the best state
+              (hillClimbingPlanner $bestState $goal $testedActions (cons-atom $bestAction $plan) $ruleSpace) ;recursively explore the best state
               )
               ;No improvement, mark all untried actions as tested
              (let $res (allTested $untriedActions $tested) (markAllTested $initialState $untriedActions $testedActions)
