@@ -58,7 +58,7 @@
               (hill_climbing_planner $bestState $goal $testedActions (cons-atom $bestAction $plan) $ruleSpace) ;recursively explore the best state
               )
               ;No improvement, mark all untried actions as tested
-             (let $res (markAllTested $untriedActions $tested) ()
+             (let $res (allTested $untriedActions $tested) (markAllTested $initialState $untriedActions $testedActions)
                   ;(println! (markAll $res))
               )
             )
@@ -135,15 +135,30 @@
     )
    )
 
-(= (markAllTested $actions $tested)
+(= (allTested $actions $tested)
    (if (== $actions ())
      $tested
      (let ($head $tail) (decons-atom $actions)
        (if (isMember $head $tested)
-         (markAllTested $tail $tested)
-         (markAllTested $tail (cons-atom $head $tested))
+         (allTested $tail $tested)
+         (allTested $tail (cons-atom $head $tested))
          )
       )
+     )
+   )
+
+(= (markAllTested $state $list $space)
+   (if (== $list ())
+     ()
+     (let* (
+            ($head (car-atom $list))
+            ($tail (cdr-atom $list))
+            )
+       (if (== $head ())
+         ()
+         (let () (add-atom $space ($state $head)) (markAllTested $state $tail $space))
+         )
+       )
      )
    )
 
