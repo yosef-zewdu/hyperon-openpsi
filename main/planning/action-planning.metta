@@ -27,41 +27,41 @@
   ; 6. compute modulator values from the demand values.
   ; 7. compute emotion states from the modulator values.
 
-! (bind! np (py-atom numpy))
+!(bind! np (py-atom numpy))
 !(bind! &testedActions (new-space))
+
+(= (TestedActions) &testedActions)
 
 (= (hill_climbing_planner $initialState $goal $testedActions $plan $ruleSpace)
    (if (== $initialState $goal) ;if the current state is the goal, return the plan.
      $plan
      (let* (
-            ($tested (getTestedActions $initialState)) ;query tested actions for initialState.
-            (() (if (== () $tested) (add-atom &testedActions ($initialState ())) ()))
+            ($tested (getTestedActions $initialState $testedActions)) ;query tested actions for initialState.
             ($applicableActions (collapse (match $ruleSpace 
                                                  (: $handle (IMPLICATION_LINK (AND_LINK (($initialState) $action)) $g))
-                                                 $action))) ;get applicable actions and .
-            ($untriedActions (filterUntriedRules $applicableActions $tested () $ruleSpace)) ;filter out the ones that already have been tested.
+                                                 $action))) ;get applicable actions and.
+            ($untriedActions (filterUntriedRules $applicableActions $tested () )) ;Filter out the ones that already have been tested.
+            ;(() (println! ( tested --> $tested untried --> $untriedActions applicable --> $applicableActions plan --> $plan)))
           )
        (if (== $untriedActions ()) ;No untested actions, return ()
          ()
          (let* (
                 ($newStates (applyActions $untriedActions $initialState () $ruleSpace)) ;Apply all actions to get new states.
-                (($minDistance $bestPair) (findMinDistance $newStates $goal -1000 () $ruleSpace)) ;find the least distance among the new states.
+                (($minDistance $bestPair) (findMinDistance $newStates $goal 1000 () $ruleSpace)) ;find the least distance among the new states.
                 ($currentDistance (distance $initialState $goal $ruleSpace))
-                )
-           (if (< $currentDistance $minDistance)
-             (let ($bestAction $bestState) 
-               (decons-atom $bestPair) 
-               (let () (add-atom &testedActions ($initialState $bestAction)) 
-                 (hill_climbing_planner $bestState $goal $testedActions (cons-atom $bestAction $plan) $ruleSpace) ;recursively explore the best state
-                 )
-             (let* (;No improvement, mark all untried actions as tested
-                    ($testedWithInitial (getTestedActions $initialState))
-                    ($res (markAllTested $untriedActions $testedWithInitial $ruleSpace))
-                    ) 
-                ()
+                ($bestAction (car-atom $bestPair))
+                ($bestState (cadr-atom $bestPair))
+                (() (println! (new-stateus (bestAction $bestAction) (appActions $newStates) (currState $initialState) (plan $plan) (currDistance $currentDistance) (minDis $minDistance))))
               )
-             )
-           )
+           (if (>= $currentDistance $minDistance)
+            (let () (update-atom $testedActions ($initialState $bestAction) ($bestState $bestAction)) 
+              (hill_climbing_planner $bestState $goal $testedActions (cons-atom $bestAction $plan) $ruleSpace) ;recursively explore the best state
+              )
+              ;No improvement, mark all untried actions as tested
+             (let $res (markAllTested $untriedActions $tested) ()
+                  ;(println! (markAll $res))
+              )
+            )
           )
          )
       )
@@ -69,23 +69,8 @@
    )
 
 (= (distance $current $goal $ruleSpace)
-   (- 1 (S_d (goal-value $current) (goal-value $goal) (desired-goal-value $goal) 1)) ;TODO: calculate over every demand, if necessary
-   )
-
-(= (markAsTested $rules $space)
-   (if (== $rules ())
-      ()
-      (let* (
-             (($head $tail) (decons-atom $rules))
-             ($_ (update-atom $space ($rule $_) ($rule True)))
-             )
-            (if (== $head ())
-              ()
-              (markAsTested $tail $space)
-              )
-       )
-
-    )
+   (- 1 (S_d (goal-value $current $ruleSpace) 
+             (goal-value $goal $ruleSpace) (desired-goal-value $goal $ruleSpace) 1)) ;TODO: calculate over every demand, if necessary
    )
 
 (= (applyActions $actions $goal $acc $ruleSpace)
@@ -93,8 +78,9 @@
      $acc
      (let* (
             (($head $tail) (decons-atom $actions))
-            ($res (collapse (match $ruleSpace (: $handle (IMPLICATION_LINK (AND_LINK (($context) $head)) $goal) ) ($head $context))))
+            ($res (collapse (match $ruleSpace (: $handle (IMPLICATION_LINK (AND_LINK (($goal) $head)) $g) ) ($head $g))))
             ($rest (applyActions $tail $goal (concatTuple $res $acc) $ruleSpace))
+            (() (println! (appAc $res $rest)))
           )
        (if (== $head ())
          (concatTuple $acc $res)
@@ -122,17 +108,13 @@
      )
     )
    
-(= (isTested $element $space)
-   (let $res (collapse (match $space (Tested $element) $element)) (not (== (len $res) 0)))
-   )
-
-(= (filterUntriedRules $actions $tested $acc $ruleSpace)
+(= (filterUntriedRules $actions $tested $acc)
      (if (== $actions ())
       $acc
       (let ($head $tail) (decons-atom $actions)
-        (if (isTested $head)
-          (filterUntriedRules $actions $tested (cons-atom $head $acc) $ruleSpace)
-          (filterUntriedRules $actions $tested $acc $ruleSpace)
+        (if (isMember $head $tested)
+          (filterUntriedRules $tail $tested $acc)
+          (filterUntriedRules $tail $tested (cons-atom $head $acc))
           )
        )
     )
@@ -153,18 +135,18 @@
     )
    )
 
-(= (markAllTested $actions $tested $space)
+(= (markAllTested $actions $tested)
    (if (== $actions ())
      $tested
      (let ($head $tail) (decons-atom $actions)
-       (if (isTested $head $space)
-         (markAllTested $tail $tested $space)
-         (markAllTested $tail (cons-atom $head $tested) $space)
+       (if (isMember $head $tested)
+         (markAllTested $tail $tested)
+         (markAllTested $tail (cons-atom $head $tested))
          )
       )
      )
    )
 
-(= (getTestedActions $key)
-   (collapse (match &testedActions ($key $action) $action))
+(= (getTestedActions $key $space)
+   (collapse (match $space ($key $action) $action))
    )
