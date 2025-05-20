@@ -33,7 +33,7 @@
 (= (TestedActions) &testedActions)
 
 (= (hillClimbingPlanner $initialState $goal $testedActions $plan $ruleSpace)
-   (if (== $initialState $goal) ;if the current state is the goal, return the plan.
+   (if (== $initialState $goal) ;if thecurrent state is the goal or a path from $initalState to $goal has been found, return the plan.
      $plan
      (let* (
             ($tested (getTestedActions $initialState $testedActions)) ;query tested actions for initialState.
@@ -51,16 +51,15 @@
                 ($currentDistance (distance $initialState $goal $ruleSpace))
                 ($bestAction (car-atom $bestPair))
                 ($bestState (cadr-atom $bestPair))
-                (() (println! (new-stateus (bestAction $bestAction) (appActions $newStates) (currState $initialState) (plan $plan) (currDistance $currentDistance) (minDis $minDistance))))
+                ;(() (println! (new-stateus (bestAction $bestAction) (appActions $newStates) (currState $initialState) 
+                ;(plan $plan) (currDistance $currentDistance) (minDis $minDistance))))
               )
            (if (>= $currentDistance $minDistance)
             (let () (update-atom $testedActions ($initialState $bestAction) ($bestState $bestAction)) 
               (hillClimbingPlanner $bestState $goal $testedActions (cons-atom $bestAction $plan) $ruleSpace) ;recursively explore the best state
               )
               ;No improvement, mark all untried actions as tested
-             (let $res (allTested $untriedActions $tested) (markAllTested $initialState $untriedActions $testedActions)
-                  ;(println! (markAll $res))
-              )
+             (let $res (allTested $untriedActions $tested) (markAllTested $initialState $untriedActions $testedActions))
             )
           )
          )
@@ -70,7 +69,11 @@
 
 (= (distance $current $goal $ruleSpace)
    (- 1 (S_d (goal-value $current $ruleSpace) 
-             (goal-value $goal $ruleSpace) (desired-goal-value $goal $ruleSpace) 1)) ;TODO: calculate over every demand, if necessary
+             (goal-value $goal $ruleSpace) 
+             (desired-goal-value $goal $ruleSpace) 
+             1
+          )
+      ) ;TODO: calculate over every demand, if necessary
    )
 
 (= (applyActions $actions $goal $acc $ruleSpace)
@@ -80,7 +83,7 @@
             (($head $tail) (decons-atom $actions))
             ($res (collapse (match $ruleSpace (: $handle (IMPLICATION_LINK (AND_LINK (($goal) $head)) $g) ) ($head $g))))
             ($rest (applyActions $tail $goal (concatTuple $res $acc) $ruleSpace))
-            (() (println! (appAc $res $rest)))
+            ;(() (println! (appAc $res $rest)))
           )
        (if (== $head ())
          (concatTuple $acc $res)

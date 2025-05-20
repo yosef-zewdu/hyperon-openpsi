@@ -16,15 +16,18 @@
 !(assertEqual (getContext r1) (initContext))
 !(assertEqual (getGoal r1) g1)
 
-!(addRule r2 (g1) a2 g2 (TTV 1 (STV 1.0 1.0)))
-!(assertEqual (getContext r2) (g1))
-!(assertEqual (getAction r2) a2)
-!(assertEqual (getGoal r2) g2)
+!(addRule r2 (g1) (goNear (self Bob)) g2 (TTV 1 (STV 1.0 1.0)))
+;!(assertEqual (getContext r2) (g1))
+;!(assertEqual (getAction r2) a2)
+;!(assertEqual (getGoal r2) g2)
 
-!(addRule r3 (g2) a3 finalGoal (TTV 1 (STV 1.0 1.0)))
-!(assertEqual (getContext r3) (g2))
-!(assertEqual (getAction r3) a3)
-!(assertEqual (getGoal r3) finalGoal)
+;!(addRule r3 (g3) a3 finalGoal (TTV 1 (STV 1.0 1.0)))
+;!(assertEqual (getContext r3) (g2))
+;!(assertEqual (getAction r3) a3)
+;!(assertEqual (getGoal r3) finalGoal)
 
-!(addGoal finalGoal 0.9 1 &self)
-!(hillClimbingPlanner g1 finalGoal (TestedActions) () &self)
+!(addRule r3 (g2) (ask (Bob "What's your name?")) externalNovelty (TTV 1 (STV 1.0 1.0)))
+!(addGoal finalGoal 0.1 0.2 &self)
+!(addGoal externalNovelty 0.9 1 &self)
+
+!(hillClimbingPlanner g1 externalNovelty (TestedActions) () &self)
