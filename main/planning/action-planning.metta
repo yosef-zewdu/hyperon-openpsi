@@ -199,14 +199,23 @@
 ;; an action at each step.
 (= (planner $ruleSpace $initState $goal $accum)
     (if (== $initState $goal)
-        $accum ;; contains all the actions in the action selection criterion
+        (let* (
+            ($initRules (findRulesWtihContext $ruleSpace $initState))
+            (($initRule $initAction) (selectSingleAction $initRules (getDgv $goal)))
+            ($accum' (union-atom $accum ($initAction)))    
+        ) 
+            $accum'
+        ) ;; contains all the actions in the action selection criterion
         (let* (
             ($target (getDgv $goal))
             ($goalName (extractGoalName $goal))
             ($relatedRules (findRulesWithContext $ruleSpace $initState))
+            (($rule $currAction) (selectSingleAction $relatedRules $target))
+            ($accum' (if (== $currAction ()) $accum (union-atom $accum ($currAction))))
             ($goals (collapse (extractGoalFromRule (superpose $relatedRules))))
             ($_ (println! (goals $goals)))
             ($nextRules (findRulesForMultipleGoals $ruleSpace $goals ()))
+
             ($_ (println! (currentState $initState)))
             ($_ (println! (next Rules $nextRules)))
             ($_ (println! (goal name $goalName)))
@@ -220,11 +229,11 @@
                 (let* (
                     ($_ (println! (No more action found)))
                 )
-                    $accum
+                    $accum'
                 )
                 (let* (
                     ($_ (println! (non-empty action)))
-                    ($newAccum (union-atom $accum ($action))) ;; accumulating actions in the action accumulator.
+                    ($newAccum (union-atom $accum' ($action))) ;; accumulating actions in the action accumulator.
                     ($newState (extractGoalFromRule $currRule))         
                 )
                     (planner $ruleSpace $newState $goal $newAccum)
