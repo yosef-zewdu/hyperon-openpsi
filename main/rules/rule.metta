@@ -134,7 +134,7 @@
       (if (goalExists $name $space)
           (Goal With Id $name Already Exists)
           (let () 
-              (add-atom $space ($name (Goal $value $dgv))) 
+              (add-atom $space (Goal $name $value $dgv)) 
               $name
           )
         )
@@ -161,8 +161,7 @@
 (: setGv (-> Symbol Number Grounded (->)))
 (= (setGv $goal $value $space)
    (if (goalExists $goal $space)
-          (match $space ($goal (Goal $oldGv $oldDgv)) (update-atom $space ($goal (Goal $oldGv $oldDgv)) ($goal (Goal $value $oldDgv)))
-              )
+          (match $space (Goal $goal $oldGv $oldDgv) (update-atom $space (Goal $goal $oldGv $oldDgv) (Goal $goal $value $oldDgv)))
           (Invalid Goal Id)
     )
    )
@@ -170,12 +169,12 @@
 (: setDgv (-> Symbol Number Grounded (->)))
 (= (setDgv $goal $value $space)
    (if (goalExists $goal $space)
-          (match $space ($goal (Goal $oldGv $oldDgv)) (update-atom $space ($goal (Goal $oldGv $oldDgv)) ($goal (Goal $oldGv $value)))) 
+          (match $space (Goal $goal $oldGv $oldDgv) (update-atom $space (Goal $goal $oldGv $oldDgv) (Goal $goal $oldGv $value))) 
           (Invalid Goal Id)
     )
    )
 
-(= (goalExists $goal $space) (not (== (collapse (match $space ($goal (Goal $value $dgv)) $goal)) ())))
+(= (goalExists $goal $space) (not (== (collapse (match $space (Goal $goal $value $dgv) $goal)) ())))
 
 ;For each AndLink, get all ImplicationLink atoms pointing to it.
 ;Filter these to keep only valid PSI rules using the isRule predicate function.
@@ -270,12 +269,12 @@
 
 (: goal-value (-> Symbol Grounded Number))
 (= (goal-value $goal $space)
-    (match $space ($goal (Goal $value $dgv)) $value)
+    (match $space (Goal $goal $value $dgv) $value)
 )
 
 (: desired-goal-value (-> Symbol Grounded Number))
 (= (desired-goal-value $goal $space)
-   (match $space ($goal (Goal $value $dgv)) $dgv)
+   (match $space (Goal $goal $value $dgv) $dgv)
    )
 
 
