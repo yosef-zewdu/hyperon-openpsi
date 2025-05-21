@@ -1,7 +1,7 @@
-!(register-module! ../../../hyperon-openpsi)
-!(register-module! ../../utilities-module)
+!(register-module! ../../../../hyperon-openpsi)
+!(register-module! ../../../utilities-module)
 
-!(import! &self hyperon-openpsi:main:planning:action-planning)
+!(import! &self hyperon-openpsi:main:planning:action-planner)
 !(import! &self hyperon-openpsi:main:types)
 !(import! &self hyperon-openpsi:main:rules:rule)
 !(import! &self utilities-module:utils)
