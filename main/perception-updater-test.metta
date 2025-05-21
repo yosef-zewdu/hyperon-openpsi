@@ -1,0 +1,20 @@
+!(register-module!  ../../hyperon-openpsi)
+!(import! &self hyperon-openpsi:main:perception-updater)
+!(bind! &cacheTest (new-space))
+!(bind! &perceptaTest (new-space))
+!(bind! &envSpaceTest (new-space))
+
+!(add-atom &envSpaceTest (a b c d))
+!(assertEqual (fetchMaxCycle &perceptaTest) 0)
+!(assertEqual (changeToPercepta ((State car) (State Tree) (State house)) 3) ((perception 3 (State house)) (perception 3 (State Tree)) (perception 3 (State car)))) 
+!(add-reduct &cacheTest (superpose ((a b c) (d e f) (g h i))))
+!(perceptionUpdater &cacheTest &perceptaTest 3)
+!(assertEqual (collapse (get-atoms &perceptaTest)) ((perception 1 (g h i)) (perception 1 (d e f)) (perception 1 (a b c))))
+!(assertEqual (collapse (get-atoms &cacheTest)) ())
+!(assertEqual (fetchMaxCycle &perceptaTest) 1)
+!(add-reduct &cacheTest (superpose ((a b x) (d e h) (g h r))))
+!(perceptionUpdater &cacheTest &perceptaTest 3)
+!(get-atoms &perceptaTest)
+!(assertEqual (fetchMaxCycle &perceptaTest) 2)
+
+
