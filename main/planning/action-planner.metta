@@ -1,32 +1,3 @@
- 
-;; so what are the things that are known in prior
-;; 1. An agent knows the current context it is in.
-;; 2. An agent knows the goal it shall achieve. Should involve in some kind of searching mechanism
-;; 3. There is a rule space that contains all the necessary cognitive schema. This is expected 
-;; to be mined by the pattern miner.
-;; 4. Since the agent knows its initial state, it will start 
-;; from there and search rules that begins with the initial state.
-;; 5. Hence, the agent selects the rule with the best metric.
-;; 6. Then it selects the action from the rule and adds it to an accumulator.
-;; 7. Then it starts from the goal as a context from the rule that is selected.
-
-
-;How are goal and demand are related?
-  ;Demand -> Ubergoal (higher level goal) -> Goal
-  ;Ubergoal values are derived from tv of their correspoding Demand
-  ;Ubergoals are automatically goals, they are related to Goals with STI
-
-  ;motive selection steps:
-  ; 1. choose the most dominant demand
-  ; 2. choose the most important uberGoal, based on a higher STI
-  ; 3. choose the goal that has the strongest connection to the dominant uberGoal as the goal
-  ;planning steps:
-  ; 4. prepare a list of actions that will lead to the demand being satisfied, choosing an inital goal randomly.
-  ; 5. update demand values using demandUpdaterAgent.
-  ;modulator and emotion computation steps:
-  ; 6. compute modulator values from the demand values.
-  ; 7. compute emotion states from the modulator values.
-
 !(bind! np (py-atom numpy))
 !(bind! &testedActions (new-space))
 
@@ -43,7 +14,7 @@
             ($untriedActions (filterUntriedRules $applicableActions $tested () )) ;Filter out the ones that already have been tested.
             ;(() (println! ( tested --> $tested untried --> $untriedActions applicable --> $applicableActions plan --> $plan)))
           )
-       (if (== $untriedActions ()) ;No untested actions, return ()
+       (if (== $untriedActions ()) ;No untested actions, return () to back
          ()
          (let* (
                 ($newStates (applyActions $untriedActions $initialState () $ruleSpace)) ;Apply all actions to get new states.
@@ -58,8 +29,8 @@
             (let () (update-atom $testedActions ($initialState $bestAction) ($bestState $bestAction)) 
               (hillClimbingPlanner $bestState $goal $testedActions (cons-atom $bestAction $plan) $ruleSpace) ;recursively explore the best state
               )
-              ;No improvement, mark all untried actions as tested
-             (let $res (allTested $untriedActions $tested) (markAllTested $initialState $untriedActions $testedActions))
+              ;No improvement, mark all untried actions as tested and return () to backtrack
+             (let $res (allTested $untriedActions $tested) (let $m (markAllTested $initialState $untriedActions $testedActions) ()))
             )
           )
          )
@@ -68,13 +39,13 @@
    )
 
 (= (distance $current $goal $ruleSpace)
-   (- 1 (S_d (goal-value $current $ruleSpace) 
-             (goal-value $goal $ruleSpace) 
-             (desired-goal-value $goal $ruleSpace) 
-             1
+   (let* (
+          ($x (- (goal-value $goal $ruleSpace) (goal-value $current $ruleSpace)))
+          ($y (- (desired-goal-value $goal $ruleSpace) (desired-goal-value $current $ruleSpace)))
           )
-      ) ;TODO: calculate over every demand, if necessary
-   )
+     (+ $x $y)
+     )
+  )
 
 (= (applyActions $actions $goal $acc $ruleSpace)
    (if (== $actions ())
@@ -83,7 +54,7 @@
             (($head $tail) (decons-atom $actions))
             ($res (collapse (match $ruleSpace (: $handle (IMPLICATION_LINK (AND_LINK (($goal) $head)) $g) ) ($head $g))))
             ($rest (applyActions $tail $goal (concatTuple $res $acc) $ruleSpace))
-            ;(() (println! (appAc $res $rest)))
+            ;(() (println! (appAc $res )))
           )
        (if (== $head ())
          (concatTuple $acc $res)
@@ -92,24 +63,6 @@
       )
      )
    )
-
-(= (fuzzy_equal $x $t $a)
-    (/ 1
-        (+ 1
-            (* $a (*(- $x $t) (- $x $t)))
-        )  
-    )     
-)
-
-(= (S_d $current $min_l $max_l $alpha)
-   (if(< $current $min_l)
-     (fuzzy_equal $current $min_l $alpha)
-     (if (> $current $max_l)
-      (+ 0.9 (* ((py-dot np random.random)) 0.1))
-      (+ 0.8 (* ((py-dot np random.random)) 0.2))
-       )
-     )
-    )
    
 (= (filterUntriedRules $actions $tested $acc)
      (if (== $actions ())
