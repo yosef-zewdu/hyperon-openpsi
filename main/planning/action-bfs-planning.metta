@@ -16,29 +16,7 @@
 
 (= (addRulesToSpace $space)
     (add-reduct $space (superpose (
-            ;;  ((: x ((TTV 1 (STV 0.7 0.6)) (IMPLICATION_LINK (AND_LINK ((Goal init 0.9 0.6) act1)) (Goal g 1.0 1.0)))) 3)
-            ;;  ((: y ((TTV 1 (STV 0.6 0.5)) (IMPLICATION_LINK (AND_LINK ((Goal g 0.9 0.6) act1)) (Goal g1 1.0 1.0)))) 4)
-            ;;  ((: r1 ((TTV 1 (STV 0.8 0.7)) 
-            ;;         (IMPLICATION_LINK 
-            ;;         (AND_LINK ((Goal init 0.9 0.6) explore)) 
-            ;;         (Goal found_target 1.0 1.0)))) 2)
-            ;; ((: r2 ((TTV 1 (STV 0.75 0.65)) 
-            ;;     (IMPLICATION_LINK 
-            ;;     (AND_LINK ((Goal found_target 0.95 0.7) approach)) 
-            ;;     (Goal near_target 1.0 1.0)))) 3)
-            ;; ((: r3 ((TTV 1 (STV 0.7 0.6)) 
-            ;;     (IMPLICATION_LINK 
-            ;;     (AND_LINK ((Goal near_target 0.9 0.7) interact)) 
-            ;;     (Goal task_done 1.0 1.0)))) 2)
-            ;; ((: r4 ((TTV 1 (STV 0.65 0.6)) 
-            ;;     (IMPLICATION_LINK 
-            ;;     (AND_LINK ((Goal task_done 0.9 0.8) report)) 
-            ;;     (Goal mission_complete 1.0 1.0)))) 10)
-            ;; ((: r5 ((TTV 1 (STV 0.5 0.5)) 
-            ;;     (IMPLICATION_LINK 
-            ;;     (AND_LINK ((Goal init 0.8 0.5) idle)) 
-            ;;     (Goal low_energy 1.0 1.0)))) 1)
-                ;; r1: Start exploring
+            
 ((: r1 ((TTV 1 (STV 0.8 0.7)) 
         (IMPLICATION_LINK 
           (AND_LINK ((Goal init 0.9 0.6) explore)) 
@@ -178,6 +156,12 @@
         )
     )
 )
+(= (findRulesWithGoal $space $goal)
+    (collapse (match $space ((: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal))) $weight)
+        ((: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal))) $weight)
+        
+    ))
+)
 
 (= (getDgv $goal)
     (let (Goal $name $x $y) $goal $y)
@@ -197,52 +181,46 @@
 )
 ;; an implementation inspired that greedily selects 
 ;; an action at each step.
-(= (planner $ruleSpace $initState $goal $accum)
+(= (planner' $ruleSpace $initState $goal $target $accum)
     (if (== $initState $goal)
+        $accum
         (let* (
-            ($initRules (findRulesWtihContext $ruleSpace $initState))
-            (($initRule $initAction) (selectSingleAction $initRules (getDgv $goal)))
-            ($accum' (union-atom $accum ($initAction)))    
-        ) 
-            $accum'
-        ) ;; contains all the actions in the action selection criterion
-        (let* (
-            ($target (getDgv $goal))
             ($goalName (extractGoalName $goal))
             ($relatedRules (findRulesWithContext $ruleSpace $initState))
             (($rule $currAction) (selectSingleAction $relatedRules $target))
             ($accum' (if (== $currAction ()) $accum (union-atom $accum ($currAction))))
             ($goals (collapse (extractGoalFromRule (superpose $relatedRules))))
-            ($_ (println! (goals $goals)))
             ($nextRules (findRulesForMultipleGoals $ruleSpace $goals ()))
-
-            ($_ (println! (currentState $initState)))
-            ($_ (println! (next Rules $nextRules)))
-            ($_ (println! (goal name $goalName)))
-            ($_ (println! (accumulator $accum)))
-            ($_ (println! (target $target)))
             (($currRule $action) (selectSingleAction $nextRules $target))
-            ($_ (println! (currRule $currRule action $action)))
             
         )
             (if (== $action ())
+                $accum'
                 (let* (
-                    ($_ (println! (No more action found)))
-                )
-                    $accum'
-                )
-                (let* (
-                    ($_ (println! (non-empty action)))
                     ($newAccum (union-atom $accum' ($action))) ;; accumulating actions in the action accumulator.
                     ($newState (extractGoalFromRule $currRule))         
                 )
-                    (planner $ruleSpace $newState $goal $newAccum)
+                    (planner' $ruleSpace $newState $goal $target $newAccum)
                 )
             )
 
         )        
     )
 )
+(= (planner $ruleSpace $initState $goal)
+    (let* (
+        
+        ($targetRules (findRulesWithGoal $ruleSpace $goal))
+        ($targetRule (car-atom $targetRules))
+        ($target (getWeightFromRule $targetRule))
+        ($_ (println! (targetRules $targetRules target $target)))
+        
+    )
+        (planner' $ruleSpace $initState $goal $target ())
+
+    )
+)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;              Tests for action Planner                    ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -268,5 +246,5 @@
 !(getDgv (Goal first 1.0 0.3))
 !(selectSingleAction (collapse (get-atoms &ruleSpace)) 10.0)
 !(findRulesWithGoalAsContext &ruleSpace (Goal low_energy 1 1))
-!(planner &ruleSpace (Goal init 0.9 0.6) (Goal reset_system 1.0 1.0) ())
+!(planner &ruleSpace (Goal init 0.9 0.6) (Goal mission_complete 1.0 1.0))
 ;; !(selectSingleAction (()) 1.0)
