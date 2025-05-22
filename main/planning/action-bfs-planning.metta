@@ -124,14 +124,14 @@
 
 ;; This function might require further modification later.
 (= (findRulesWithContext $space $context)
-    (collapse (match $space ((: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal))) $weight)
-        ((: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal))) $weight) 
+    (collapse (match $space ((: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ((Goal $context $x $y) $action)) $goal))) $weight)
+        ((: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ((Goal $context $x $y) $action)) $goal))) $weight) 
     ))
 
 )
 (= (findRulesWithGoalAsContext $space $goal)
-    (collapse (match $space ((: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ($goal $action)) $nextGoal))) $weight)
-        ((: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ($goal $action)) $nextGoal))) $weight) 
+    (collapse (match $space ((: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ((Goal $goal $x $y) $action)) $nextGoal))) $weight)
+        ((: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ((Goal $goal $x $y) $action)) $nextGoal))) $weight) 
     ))
 
 )
@@ -149,7 +149,8 @@
         $accum
         (let* (
             (($head $tail) (decons-atom $goals))
-            ($rules (findRulesWithGoalAsContext $space $goal))
+            ($goalName (extractGoalName $head))
+            ($rules (findRulesWithGoalAsContext $space $goalName))
             ($newAccum (union-atom $accum $rules))
         )  
             (findRulesForMultipleGoals $space $tail $newAccum)
@@ -157,8 +158,8 @@
     )
 )
 (= (findRulesWithGoal $space $goal)
-    (collapse (match $space ((: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal))) $weight)
-        ((: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal))) $weight)
+    (collapse (match $space ((: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ($context $action)) (Goal $goal $x $y)))) $weight)
+        ((: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ($context $action)) (Goal $goal $x $y)))) $weight)
         
     ))
 )
@@ -185,22 +186,26 @@
     (if (== $initState $goal)
         $accum
         (let* (
-            ($goalName (extractGoalName $goal))
             ($relatedRules (findRulesWithContext $ruleSpace $initState))
+            ($_ (println! (relatedRules $relatedRules)))
             (($rule $currAction) (selectSingleAction $relatedRules $target))
+            ($_ (println! (rule $rule action $currAction)))
             ($accum' (if (== $currAction ()) $accum (union-atom $accum ($currAction))))
             ($goals (collapse (extractGoalFromRule (superpose $relatedRules))))
             ($nextRules (findRulesForMultipleGoals $ruleSpace $goals ()))
+            ($_ (println! (goals $goals nextRules $nextRules)))
             (($currRule $action) (selectSingleAction $nextRules $target))
+            ($_ (println! (currRule $currRule action $action)))
             
         )
             (if (== $action ())
                 $accum'
                 (let* (
                     ($newAccum (union-atom $accum' ($action))) ;; accumulating actions in the action accumulator.
-                    ($newState (extractGoalFromRule $currRule))         
+                    ($newState (extractGoalFromRule $currRule))
+                    ($stateName (extractGoalName $newState))         
                 )
-                    (planner' $ruleSpace $newState $goal $target $newAccum)
+                    (planner' $ruleSpace $stateName $goal $target $newAccum)
                 )
             )
 
@@ -211,6 +216,7 @@
     (let* (
         
         ($targetRules (findRulesWithGoal $ruleSpace $goal))
+        ($_ (println! (targetRules $targetRules)))
         ($targetRule (car-atom $targetRules))
         ($target (getWeightFromRule $targetRule))
         ($_ (println! (targetRules $targetRules target $target)))
@@ -246,5 +252,5 @@
 !(getDgv (Goal first 1.0 0.3))
 !(selectSingleAction (collapse (get-atoms &ruleSpace)) 10.0)
 !(findRulesWithGoalAsContext &ruleSpace (Goal low_energy 1 1))
-!(planner &ruleSpace (Goal init 0.9 0.6) (Goal mission_complete 1.0 1.0))
+!(planner &ruleSpace init  mission_complete)
 ;; !(selectSingleAction (()) 1.0)
