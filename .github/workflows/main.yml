@@ -4,11 +4,11 @@ on:
   push:
     branches:
       - main
-      - experimental
+      - dev
   pull_request:
     branches:
       - main
-      - experimental
+      - dev
 
 jobs:
   setup-and-test:
