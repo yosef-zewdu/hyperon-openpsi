@@ -1,8 +1,8 @@
-!(register-module!  ../../hyperon-openpsi)
-!(register-module! ../utilities-module)
+!(register-module! ../../../../../hyperon-openpsi)
+!(register-module! ../../../../utilities-module)
 !(import! &self utilities-module:utils)
-!(import! &self hyperon-openpsi:utils:psi_utils)
-!(import! &self hyperon-openpsi:main:feeling-updaters)
+!(import! &self hyperon-openpsi:psi-utilities:psi_utils)
+!(import! &self hyperon-openpsi:main:mind-agents:feeling-updater:feeling-updaters)
 
 !(assertEqual (modulator_to_feeling_dimension 0.85 1) 1)
 !(assertEqual (feeling_calculator 1 1 1 1 1 5) 0.3252525252525253)

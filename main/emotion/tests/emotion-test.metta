@@ -1,7 +1,7 @@
-!(register-module! ../utilities-module)
-!(register-module!  ../../hyperon-openpsi)
+!(register-module! ../../../../hyperon-openpsi)
+!(register-module! ../../../utilities-module)
 !(import! &self utilities-module:utils)
-!(import! &self hyperon-openpsi:main:emotion)
+!(import! &self hyperon-openpsi:main:emotion:emotion)
 !(bind! &test-space (new-space))
 
 ;;Tests for emotion 

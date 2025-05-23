@@ -1,5 +1,5 @@
-!(register-module!  ../../hyperon-openpsi)
-!(import! &self hyperon-openpsi:main:perception-updater)
+!(register-module! ../../../../../hyperon-openpsi)
+!(import! &self hyperon-openpsi:main:mind-agents:perception-updater:perception-updater)
 !(bind! &cacheTest (new-space))
 !(bind! &perceptaTest (new-space))
 !(bind! &envSpaceTest (new-space))

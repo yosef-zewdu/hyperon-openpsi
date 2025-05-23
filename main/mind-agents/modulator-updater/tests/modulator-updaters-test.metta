@@ -1,5 +1,5 @@
-!(register-module!  ../../hyperon-openpsi)
-!(import! &self hyperon-openpsi:main:modulator-updaters)
+!(register-module! ../../../../../hyperon-openpsi)
+!(import! &self hyperon-openpsi:main:mind-agents:modulator-updater:modulator-updaters)
 
 
 !(assertEqual (ActivationHelper 4 3 2) 4.8743169398907105)

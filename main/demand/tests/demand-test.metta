@@ -1,7 +1,7 @@
-!(register-module!  ../../hyperon-openpsi)
-!(register-module! ../utilities-module)
+!(register-module! ../../../../hyperon-openpsi)
+!(register-module! ../../../utilities-module)
 !(import! &self utilities-module:utils)
-!(import! &self hyperon-openpsi:utils:psi_utils)
+!(import! &self hyperon-openpsi:psi-utilities:psi_utils)
 !(import! &self hyperon-openpsi:main:demand)
 
 !(bind! &demandSpace (new-space))
