@@ -1,6 +1,7 @@
 !(register-module! ../../../../hyperon-openpsi)
 !(import! &self hyperon-openpsi:main:planning:action-bfs-planning)
 
+!(addRulesToSpace &ruleSpace)
 !(assertEqual (getWeightFromRule ((: r1 ((TTV 1 (STV 0.8 0.7)) 
                     (IMPLICATION_LINK 
                     (AND_LINK ((Goal init 0.9 0.6) explore)) 

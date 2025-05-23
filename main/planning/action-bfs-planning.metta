@@ -11,6 +11,7 @@
 ;; 7. Then it starts from the goal as a context from the rule that is selected.
 !(bind! &ruleSpace (new-space))
 
+
 (= (addRulesToSpace $space)
     (add-reduct $space (superpose (
             
