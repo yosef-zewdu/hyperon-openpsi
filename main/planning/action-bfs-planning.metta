@@ -10,9 +10,6 @@
 ;; 6. Then it selects the action from the rule and adds it to an accumulator.
 ;; 7. Then it starts from the goal as a context from the rule that is selected.
 !(bind! &ruleSpace (new-space))
-(= (weightRule $rule)
-    (random-float 0 1)
-)
 
 (= (addRulesToSpace $space)
     (add-reduct $space (superpose (
@@ -69,7 +66,7 @@
     )
 
 )
-
+;;gets weights from rule
 (= (getWeightFromRule $rule)
     (let ($schema $weight) $rule $weight)
 )
@@ -129,13 +126,14 @@
     ))
 
 )
+;; finds rules with goals as contexts
 (= (findRulesWithGoalAsContext $space $goal)
     (collapse (match $space ((: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ((Goal $goal $x $y) $action)) $nextGoal))) $weight)
         ((: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ((Goal $goal $x $y) $action)) $nextGoal))) $weight) 
     ))
 
 )
-
+;; finds rules with similar actions
 (= (findRulesWithAction $space $action)
     (collapse (match $space ((: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal))) $weight)
         ((: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal))) $weight)
@@ -157,6 +155,7 @@
         )
     )
 )
+;; filters rules with the same goal name.
 (= (findRulesWithGoal $space $goal)
     (collapse (match $space ((: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ($context $action)) (Goal $goal $x $y)))) $weight)
         ((: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ($context $action)) (Goal $goal $x $y)))) $weight)
@@ -227,30 +226,5 @@
     )
 )
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;              Tests for action Planner                    ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
- 
-!(getWeightFromRule ((: r1 ((TTV 1 (STV 0.8 0.7)) 
-                    (IMPLICATION_LINK 
-                    (AND_LINK ((Goal init 0.9 0.6) explore)) 
-                    (Goal found_target 1.0 1.0)))) 2))
-!(getWeightFromRule ((: r2 ((TTV 1 (STV 0.8 0.7)) 
-                    (IMPLICATION_LINK 
-                    (AND_LINK ((Goal init 0.9 0.6) explore)) 
-                    (Goal found_target 1.0 1.0)))) 3))
 
-!(addRulesToSpace &ruleSpace)
-!(selectActionFromRule ((: r1 ((TTV 1 (STV 0.8 0.7)) 
-                    (IMPLICATION_LINK 
-                    (AND_LINK ((Goal init 0.9 0.6) explore)) 
-                    (Goal found_target 1.0 1.0)))) 2))
-!(extractContextFromRule ((: r1 ((TTV 1 (STV 0.8 0.7)) 
-                    (IMPLICATION_LINK 
-                    (AND_LINK ((Goal init 0.9 0.6) explore)) 
-                    (Goal found_target 1.0 1.0)))) 2))
-!(getDgv (Goal first 1.0 0.3))
-!(selectSingleAction (collapse (get-atoms &ruleSpace)) 10.0)
-!(findRulesWithGoalAsContext &ruleSpace (Goal low_energy 1 1))
-!(planner &ruleSpace init  mission_complete)
-;; !(selectSingleAction (()) 1.0)
+ 
