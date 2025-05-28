@@ -92,10 +92,7 @@
    )
 
 (= (allTested $actions $tested)
-   (if (== $actions ())
-     $tested
      (let $res (union-atom $actions $tested) (unique-atom $res))
-     )
    )
 
 (= (markAllTested $state $list $space)
