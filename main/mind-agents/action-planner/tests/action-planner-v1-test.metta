@@ -1,5 +1,5 @@
-!(register-module! ../../../../hyperon-openpsi)
-!(import! &self hyperon-openpsi:main:planning:action-bfs-planning)
+!(register-module! ../../../../../hyperon-openpsi)
+!(import! &self hyperon-openpsi:main:mind-agents:action-planner:action-planner-v1)
 
 !(addRulesToSpace &ruleSpace)
 !(assertEqual (getWeightFromRule ((: r1 ((TTV 1 (STV 0.8 0.7)) 
