@@ -153,8 +153,3 @@
 !(STVZeroConfidence2 (TVMean (STV 1.0 0.0)))     ;; Very low confidence case
 !(STVZeroConfidence3 (TVMean (STV 0.5 0.0)))     ;; Very low confidence case
 
-
-
-
-;; ~~~[ TODO ]~~~
-;; 
