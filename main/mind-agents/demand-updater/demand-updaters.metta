@@ -1,8 +1,9 @@
-; Demand Updater 
-; Based on OpenPsi ben paper 
+; Demand Updater - Based on OpenPsi ben paper 
 
 ; util functions 
 !(bind! exp (py-atom numpy.exp))
+
+
 ; fuzzy new 
 ; ti is the latest time stamp of observing object i and 
 ; ts is the current time stamp of the virtual world.
@@ -19,17 +20,8 @@
     (/ 1 (+ 1 (* 0.00015 (- $di $dmax))) )
 )
 
-; length of expression 
-(= (length-exp $y)
-    (if (== $y ()) 0
-        (let $tail (cdr-atom $y) 
-            ( + 1 (length-exp $tail)))
-    )
-)
-
 ; summation of fuzzy near 
 (= (sum-fuzzy-near $lst $d-max)
-
     (if (== $lst ())               
         0
         (let*(
@@ -43,10 +35,8 @@
     ) 
 )
 
-
 ; summation of fuzzy new 
 (= (sum-fuzzy-new $lst $d-max)
-
     (if (== $lst ())               
         0
         (let*(
@@ -68,7 +58,7 @@
 
     (let* (
             ($summation (sum-fuzzy-new $lst $ts ))
-            ($object-num (length-exp $lst))
+            ($object-num (size-atom $lst))
         )
     (/ (+ $summation (random-float 0 1))
         (+ 1 (* (exp (* -0.05  $object-num)) (+ 1  $object-num)))))
@@ -81,7 +71,7 @@
 (= (AffiliationDemandUpdater  $lst  $d-max)
     (let* (
             ($summation (sum-fuzzy-near $lst $d-max ))
-            ($friend-num (length-exp $lst))
+            ($friend-num (size-atom $lst))
         )
     (/ (+ $summation (random-float 0 1))
         (+ 1 (* (exp (* -0.1  $friend-num)) (+ 1  $friend-num))))
