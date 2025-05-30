@@ -2,13 +2,14 @@
 
 ; util functions 
 !(bind! exp (py-atom numpy.exp))
+!(bind! rand-float (py-atom numpy.random.rand))
 
 
 ; fuzzy new 
 ; ti is the latest time stamp of observing object i and 
 ; ts is the current time stamp of the virtual world.
 (= (fuzzy-new $ti $ts)
-    (/ 2 (+ 1 (exp (* 0.002 (- $ts $ti)))))
+    (let $x (exp (* 0.002 (- $ts $ti))) (/ 2 (+ 1 $x)))
 )
 
 
@@ -20,7 +21,7 @@
     (/ 1 (+ 1 (* 0.00015 (- $di $dmax))) )
 )
 
-; summation of fuzzy near 
+
 (= (sum-fuzzy-near $lst $d-max)
     (if (== $lst ())               
         0
@@ -51,7 +52,6 @@
 )
 
 
-
 ; Certainity demand updater
 (: CertaintyDemandUpdater (-> Expression Number  Number))
 (= (CertaintyDemandUpdater $lst  $ts)
@@ -59,9 +59,11 @@
     (let* (
             ($summation (sum-fuzzy-new $lst $ts ))
             ($object-num (size-atom $lst))
+            ($rand (rand-float))
+            ($x (exp (* -0.05  $object-num)))
         )
-    (/ (+ $summation (random-float 0 1))
-        (+ 1 (* (exp (* -0.05  $object-num)) (+ 1  $object-num)))))
+    (/ (+ $summation $rand)
+        (+ 1 (* $x (+ 1  $object-num)))))
         
 )
 
@@ -72,12 +74,13 @@
     (let* (
             ($summation (sum-fuzzy-near $lst $d-max ))
             ($friend-num (size-atom $lst))
+            ($rand (rand-float))
+            ($x (exp (* -0.1  $friend-num))) 
         )
-    (/ (+ $summation (random-float 0 1))
-        (+ 1 (* (exp (* -0.1  $friend-num)) (+ 1  $friend-num))))
+    (/ (+ $summation $rand)
+        (+ 1 (* $x (+ 1  $friend-num))))
         
 ))
-
 
 
 ; Competence Demand Updater 
@@ -85,4 +88,3 @@
 (= (CompetenceDemandUpdater $plan-done-number  $plan-failed-number)
     (/ $plan-done-number  (+ $plan-done-number (pow-math $plan-failed-number 1.5))  )
 )
-
