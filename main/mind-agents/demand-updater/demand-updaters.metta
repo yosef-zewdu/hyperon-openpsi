@@ -5,7 +5,8 @@
 !(bind! rand-float (py-atom numpy.random.rand))
 
 
-; fuzzy new 
+; fuzzy new
+; function used to compute certainty demand level
 ; ti is the latest time stamp of observing object i and 
 ; ts is the current time stamp of the virtual world.
 (= (fuzzy-new $ti $ts)
@@ -21,36 +22,21 @@
     (/ 1 (+ 1 (* 0.00015 (- $di $dmax))) )
 )
 
-
+; summation of fuzzy near 
 (= (sum-fuzzy-near $lst $d-max)
-    (if (== $lst ())               
-        0
-        (let*(
-                ($a (car-atom $lst))
-                ($c (cdr-atom $lst))
-                ($b (fuzzy-near $a $d-max))
-                ($d (sum-fuzzy-near $c $d-max))
-            )
-             ( + $b $d)
-           )
-    ) 
+
+    (let $fnear (collapse(fuzzy-near (superpose $lst) $d-max)) 
+        (foldl-atom $fnear 0 $acc $x (+ $acc $x))
+    )
 )
 
 ; summation of fuzzy new 
-(= (sum-fuzzy-new $lst $d-max)
-    (if (== $lst ())               
-        0
-        (let*(
-                ($a (car-atom $lst))
-                ($c (cdr-atom $lst))
-                ($b (fuzzy-new $a $d-max))
-                ($d (sum-fuzzy-new $c $d-max))
-            )
-             ( + $b $d)
-           )
-    ) 
-)
+(= (sum-fuzzy-new $lst $ts)
 
+    (let $fnew (collapse(fuzzy-new (superpose $lst) $ts)) 
+        (foldl-atom $fnew 0 $acc $x (+ $acc $x))
+    )
+)
 
 ; Certainity demand updater
 (: CertaintyDemandUpdater (-> Expression Number  Number))
