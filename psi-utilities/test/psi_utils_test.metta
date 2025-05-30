@@ -1,5 +1,5 @@
-!(register-module! ../../hyperon-openpsi) ;to load Relative path for current page
-!(register-module! ../psi-utilities)
+!(register-module! ../../../hyperon-openpsi) ;to load Relative path for current page
+!(register-module! ../../psi-utilities)
 !(import! &self hyperon-openpsi:psi-utilities:psi_utils)
 
 
