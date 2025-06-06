@@ -19,8 +19,7 @@
 !(bind! &t (new-space))
 !(update-drmtc-chng-tv (Predicate has-dramatic-changes) &t (STV 0 0))
 !(update-drmtc-chng-tv (Predicate has-dramatic-changes) &t (STV 1.0 1.0))
-
-
+!(assertEqual (get-atoms &t) ((Predicate has-dramatic-changes) (STV 1.0 1.0)))
 
 (LIST_LINK (L1 A))
 (REFERENCE_LINK (
