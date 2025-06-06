@@ -36,6 +36,7 @@
 
 ;a function that removes previous changes with tv and with args from 
 ;a provided space
+(: removePrevChanges (-> Grounded Symbol (->)))
 (= (removePrevChanges $space $type)
    (let* (
           ($pred-change-with-tv (Predicate change-with-tv))
@@ -50,7 +51,7 @@
                 )
           ($old-changes-with-tv (get-incoming $pred-change-with-tv $space $type))
           ($old-changes-with-arg (get-incoming $pred-change-with-arg $space $type))
-          (() (println! ($old-changes-with-tv $old-changes-with-arg)))
+          ;(() (println! ($old-changes-with-tv $old-changes-with-arg)))
           ($_ (removePrevChanges' $space $old-changes-with-tv))
           ($_ (removePrevChanges' $space $old-changes-with-arg))
           ($_ (update-drmtc-chng-tv $pred-has-dramatic-changes $space (STV 0.0 0.0)))
@@ -60,6 +61,7 @@
    )
 
 
+(: removePrevChanges' (-> Grounded Symbol (->)))
 (= (removePrevChanges' $space $atoms)
    (if (== $atoms ())
      ()
