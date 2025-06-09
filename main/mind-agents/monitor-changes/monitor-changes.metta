@@ -30,18 +30,6 @@
 
 (= (getTV (constructor (STV $x $y))) (STV $x $y))
 ;; (: monitorChanges (-> hyperon::space::DynSpace Expression Expression))
-(= (monitorChanges $space $prev)
-	(let* (
-		($amt (random-int 2 5))
-		($_ (sleep $amt))
-		($currValues (collapse (get-atoms $space)))
-		($res (compareSpaceToList $space $currValues))
-		($_ (println! (The result is $res)))
-
-	)
-		(monitorChanges $space $currValues)
-	)
-)
 
 (: cogTvMean (-> Expression Number))
 (= (cogTvMean (STV $x $y)) (/ (+ $x $y) 2))
