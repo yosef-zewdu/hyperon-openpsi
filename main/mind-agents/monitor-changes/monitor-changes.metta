@@ -90,4 +90,3 @@
 				
 		
 !(detectChanges ((constructor (STV 0.1 0.1)) (constructor (STV 0.2 0.3)) (constructor (STV 0.3 0.5))) ((constructor (STV 0.3 0.5)) (constructor (STV 0.4 0.6))) 0.5 ())
-!(symmetricDifference (a b c) (d a b))
