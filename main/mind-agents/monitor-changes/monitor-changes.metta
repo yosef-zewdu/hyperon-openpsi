@@ -1,4 +1,6 @@
 !(bind! rand (py-atom numpy.random.rand))
+!(bind! &newSpace (new-space))
+!(bind! &sngSpace (new-space))
 (tv_delta 0.1)
 ;A function that takes the latestTime and a list of times
 ;and finds the appropriate position to set previous time pointer.
@@ -152,12 +154,8 @@
   )
 )
 
-!(bind! &newSpace (new-space))
-!(bind! &sngSpace (new-space))
-;; !(import! &self monitorChanges)
-(: NetDifference Type)
-(: netDiff (-> Number Expression NetDifference))
-!(get-type (netDiff 7 (a b c))) 
+
+
 (: compareChanges (-> hyperon::space::DynSpace hyperon::space::DynSpace Expression))
 (= (compareChanges $space1 $space2)
     (let* (
@@ -182,7 +180,7 @@
 ;; One option here could be to wrap the timer function
 ;; But do the logic using the meTTa language. 
 
-(= (getTV (constructor (STV $x $y))) (STV $x $y))
+;; (= (getTV (constructor (STV $x $y))) (STV $x $y))
 ;; (: monitorChanges (-> hyperon::space::DynSpace Expression Expression))
 
 (: cogTvMean (-> Expression Number))
@@ -238,9 +236,19 @@
 	  )
 )
 
-!(detectChangesHelper (constructor (STV 0.3 0.5)) ((constructor (STV 0.3 0.5)) (constructor (STV 0.4 0.6))) 0.5 ()) 
 
-						
-				
-		
-!(detectChanges ((constructor (STV 0.1 0.1)) (constructor (STV 0.2 0.3)) (constructor (STV 0.3 0.5))) ((constructor (STV 0.3 0.5)) (constructor (STV 0.4 0.6))) 0.5 ())
+(= (monitorChanges $space)
+	(let* (
+		($latestTimes (query $space $maxCycle));; This query is a place holder
+		($previousTimes (query $space (- $maxCycle 1)))
+		($changesSpace (detectChanges $previousTimes $latestTimes 0.1 ()))
+		($diffResult (symmetricDifference $latestTimes $previousTimes))
+		($_ (record-changes-with-tv $space $changesSpace))
+		($_ (record-changes-with-arg $space $diffResult))
+
+	)
+		()
+
+	)
+
+)

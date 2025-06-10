@@ -38,3 +38,9 @@
 !(record-changes-arg &z (L1 L2 ))
 !(assertEqual (collapse (get-atoms &z))  
 ((LIST_LINK (L1 A)) (LIST_LINK (L1 L2)) (LIST_LINK (L2 A)) (ReferenceLink ((Predicate change-with-tv) (LIST_LINK (L1 A)))) (ReferenceLink ((Predicate change-with-tv) (LIST_LINK (L2 A)))) (ReferenceLink ((Predicate change-with-arg) (LIST_LINK (L1 L2))))))
+!(detectChangesHelper (constructor (STV 0.3 0.5)) ((constructor (STV 0.3 0.5)) (constructor (STV 0.4 0.6))) 0.5 ()) 
+
+						
+				
+		
+!(detectChanges ((constructor (STV 0.1 0.1)) (constructor (STV 0.2 0.3)) (constructor (STV 0.3 0.5))) ((constructor (STV 0.3 0.5)) (constructor (STV 0.4 0.6))) 0.5 ())
