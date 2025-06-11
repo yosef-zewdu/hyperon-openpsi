@@ -220,23 +220,8 @@
 		
 	)
 )
-
-
-
-
-;;This function filps the truth-value of a rule and updates the atomspace.
-(: flipTruthValue (-> hyperon::space::DynSpace Expression Expression))
-(= (flipTruthValue &space $atom)
-   	(let* (
-		($_ (remove-atom $space $atom))
-		($newAtom (changeTruthValue $atom (STV 1 1)))
-
-	)
-	  	(add-atom $space $newAtom)
-	  )
-)
-
-
+;; This function implements the monitor Changes agent based on helper functions
+(: monitorChanges (-> hyperon::space::DynSpace Expression))
 (= (monitorChanges $space)
 	(let* (
 		($latestTimes (query $space $maxCycle));; This query is a place holder
