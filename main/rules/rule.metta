@@ -309,3 +309,31 @@
 ;; !(foldl * 1 (1 2 3 4 5))
 ;; !(foldl min 1 (1 2 3 4 5))
 ;; !(contextStv ((stv 0.5 0.4) (stv 0.6 0.8)))
+
+
+
+(=(urge-value $goal $space)
+  (- (desired-goal-value $goal $space) (goal-value $goal $space))
+ )
+
+(= (increase-urge $goal $value $space)
+  (let*
+      (
+        ($urge (urge-value $goal $space))
+        ($u (- 1.0 (+ $urge $value)))
+      )
+     (setGv $goal $u $space)
+  )
+  
+)
+
+(= (decrease-urge $goal $value $space)
+  (let*
+      (
+        ($urge (urge-value $goal $space))
+        ($u (- 1.0 (- $urge $value)))
+      )
+     (setGv $goal $u $space)
+  )
+  
+)
