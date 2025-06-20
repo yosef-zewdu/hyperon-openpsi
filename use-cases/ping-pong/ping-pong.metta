@@ -10,6 +10,7 @@
 
 (= (ping) (let $t (sleep 1)  (println! (Just ball is pinged))))
 
+
 (= (pong) 
     (let*
     
@@ -61,12 +62,13 @@
 !(addGoal (ball is pinged) 0.0 1.0 &self)
 !(addGoal (ball is ponged) 1.0 1.0 &self)
 
-!(addRule r1 ((ball is neutral)) (ping) (ball is pinged) (TTV 0 (STV 1.0 1.0)))
-!(addRule r2 ((ball is pinged)) (pong-step-loop) (ball is ponged) (TTV 0 (STV 1.0 1.0)))
-!(addRule r3 ((ball is ponged)) (ping) (ball is pinged) (TTV 0 (STV 1.0 1.0)))
 
+;; One cycle 
+; !(addRule r1 ((ball is neutral)) (ping) (ball is pinged) (TTV 0 (STV 1.0 1.0)))
+; !(addRule r2 ((ball is pinged)) (pong-step-loop) (ball is ponged) (TTV 0 (STV 1.0 1.0)))
+; !(addRule r3 ((ball is ponged)) (ping) (ball is pinged) (TTV 0 (STV 1.0 1.0)))
 
-; to continously play ping pong
+;; To continously play ping pong without stop 
 ; (= (loop)
 ;     (let*
 ;     (
@@ -79,5 +81,20 @@
 
 ; !(loop)
 
-; !(ping-pong use-case experiment)
+; qoute the actions for the planner
+!(addRule r1 ((ball is neutral))  (quote (ping)) (ball is pinged) (TTV 0 (STV 1.0 1.0)))
+!(addRule r2 ((ball is pinged))  (quote (pong-step-loop)) (ball is ponged) (TTV 0 (STV 1.0 1.0)))
+!(addRule r3 ((ball is ponged))  (quote (ping)) (ball is pinged) (TTV 0 (STV 1.0 1.0)))
+
+
+!(planner: (hillClimbingPlanner  (ball is neutral) (ball is ponged) (TestedActions) () &self))
+
+
+; to see the actions step
+!(ping)
+!(pong-step-loop)
+
+
+
+
 
