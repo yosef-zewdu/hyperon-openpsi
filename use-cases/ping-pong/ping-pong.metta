@@ -17,7 +17,6 @@
         (
             ($t (sleep 1))
             ($du (decrease-urge (ball is ponged) 1 &self))
-            ; ($txt (ball is ponged))
         ) 
             (println! (Just ball is ponged))
     )
@@ -58,6 +57,12 @@
 )
 
 
+(=(reverse $list $acc)  
+    (if(== $list ()) $acc
+    (let ($head $tail ) (decons-atom $list) (reverse $tail (cons-atom $head $acc) ))
+    )
+)
+
 !(addGoal (ball is neutral) 0.0 1.0 &self)
 !(addGoal (ball is pinged) 0.0 1.0 &self)
 !(addGoal (ball is ponged) 1.0 1.0 &self)
@@ -68,7 +73,7 @@
 ; !(addRule r2 ((ball is pinged)) (pong-step-loop) (ball is ponged) (TTV 0 (STV 1.0 1.0)))
 ; !(addRule r3 ((ball is ponged)) (ping) (ball is pinged) (TTV 0 (STV 1.0 1.0)))
 
-;; To continously play ping pong without stop 
+; To continously play ping pong without stop 
 ; (= (loop)
 ;     (let*
 ;     (
@@ -87,7 +92,7 @@
 !(addRule r3 ((ball is ponged))  (quote (ping)) (ball is pinged) (TTV 0 (STV 1.0 1.0)))
 
 
-!(planner: (hillClimbingPlanner  (ball is neutral) (ball is ponged) (TestedActions) () &self))
+!(let $planner (hillClimbingPlanner  (ball is neutral) (ball is ponged) (TestedActions) () &self) (reverse $planner ()))
 
 
 ; to see the actions step
