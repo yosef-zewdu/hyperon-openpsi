@@ -135,4 +135,27 @@
 !(FuzzyWithin (fuzzy_within 4.0 1.0 3.0 3))
 !(FuzzyWithin (fuzzy_within 0.5 1.0 3.0 3))
 !(FuzzyLessThan (fuzzy_less_than 2.0 3.0 3))
+
 !(FuzzyGreaterThan (fuzzy_greater_than 2.0 3.0 3))
+
+(= (get-outgoing $atom $space $type)
+   (collapse (match $space ($type ($atom $target)) ($type ($atom $target))))
+   )
+
+(= (get-outgoing $atom $space)
+   (collapse (match $space ($type ($atom $target)) ($type ($atom $target))))
+   )
+
+(= (out ($type ($s $t)))
+   $t
+   )
+
+(= (get-incoming $atom $space $type)
+   (collapse 
+     (union 
+      (match $space ($type ($source $atom)) ($type ($source $atom)))
+      (match $space ($type ($atom $source)) ($type ($atom $source)))
+      )
+     )
+   )
+
