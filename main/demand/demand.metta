@@ -20,7 +20,9 @@
 )
 
 (= (fetch-demand-val $space $name)
-    (let ($x $y $z) (fetch-demand $space $name) $z)
+    ; (let ($x $y $z) (fetch-demand $space $name) $z)
+    (match $space (demand $name $x) $x)
+
 )
 
 (= (getAllDemands $space)
@@ -68,3 +70,28 @@
 !(addDemand &demandspace energy 0.6)
 !(addDemand &demandspace affiliation 0.5)
 !(addDemand &demandspace competence 0.2)
+
+
+(= (demand-value-decrease $space $demand $rate)
+    (let*
+        (
+            ($demand'  (fetch-demand $space $demand))
+            ($value'   (fetch-demand-val $space $demand))
+            ($value    (- $value' (* $value' $rate)))
+            ($new-demand (demand $demand $value)) 
+        )
+            (update-atom $space $demand' $new-demand)
+    )
+)
+
+(= (demand-value-increase $space $demand $rate)
+    (let*
+        (
+            ($o-demand  (fetch-demand $space $demand))
+            ($value'   (fetch-demand-val $space $demand))
+            ($value    (+ $value' (* $value' $rate)))
+            ($new-demand (demand $demand $value)) 
+        )
+        (update-atom $space $o-demand $new-demand) 
+    )
+)
