@@ -24,3 +24,9 @@
 !(assertEqual (fetch-demand &demandSpace energy)  (demand energy 0.8))
 !(assertEqual (fetch-demand-val &demandSpace energy) 0.8)
 !(assertEqual (getEnabledDemands &demandSpace) ((demand energy 0.8) (demand affiliation 0.5) ))
+
+!(demand-value-decrease &demandSpace energy 0.3) 
+!(assertEqual (fetch-demand-val &demandSpace energy) 0.56)
+!(demand-value-increase &demandSpace energy 0.4) 
+!(assertEqual (fetch-demand-val &demandSpace energy) 0.784)
+
